@@ -6,6 +6,7 @@
 
 | 来源 | 所见设计模式 | MediQueue 采纳范围 |
 |---|---|---|
+| [微医预约指南](https://wedoctor.com/help/docx?id=15&parentId=7) | 中文在线挂号中按科室、医生、排班、时段选择的路径 | 首页任务顺序、医生详情与预约确认页 |
 | [Zocdoc 搜索帮助](https://www.zocdoc.com/patient-help/en/articles/8975433-how-does-search-work-on-zocdoc) | 以医生、专科、可用时间为核心的渐进式筛选 | 医生目录和时段选择的优先级 |
 | [dmhorlador/hospital_appointment_system](https://github.com/dmhorlador/hospital_appointment_system) | Laravel / Blade / Tailwind、患者医生管理员分角色界面、分步预约 | 保留既有栈，强化流程导航与角色入口 |
 | [AriqF1/web_poliklinik](https://github.com/AriqF1/web_poliklinik) | Laravel / Blade 的课程级诊所模块组织 | 精简模块及中文页面结构 |
@@ -39,6 +40,7 @@
 - 重做医生目录的卡片与科室筛选。
 - 把医生详情的出诊列表由横向表格改为响应式时段卡片，保持 GET 预约确认入口和幂等请求键不变。
 - 预约确认增加步骤标识与费用摘要，模拟收银台突出金额、资格反馈与演示说明。
+- 患者预约历史增加可扫读的日期摘要卡片，状态使用成功/待处理/异常/中性的语义色。
 - 管理指标增加主次层次及模拟财务区分，不修改统计 SQL。
 
 ## 必须人工核对（本 PR 的发布门槛）
