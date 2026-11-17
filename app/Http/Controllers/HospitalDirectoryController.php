@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Department;
+use App\Models\Doctor;
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -13,7 +16,7 @@ class HospitalDirectoryController extends Controller
     public function home(): View
     {
         return view('welcome', [
-            'departments' => DB::table('departments')->where('status', 'ACTIVE')->orderBy('id')->limit(6)->get(),
+            'departments' => Department::query()->where('status', 'ACTIVE')->orderBy('id')->limit(6)->get(),
             'doctorCount' => $this->publicDoctors()->count(),
         ]);
     }
@@ -21,7 +24,7 @@ class HospitalDirectoryController extends Controller
     public function departments(): View
     {
         return view('hospital.departments', [
-            'departments' => DB::table('departments')->where('status', 'ACTIVE')->orderBy('name')->paginate(12),
+            'departments' => Department::query()->where('status', 'ACTIVE')->orderBy('name')->paginate(12),
         ]);
     }
 
@@ -31,9 +34,9 @@ class HospitalDirectoryController extends Controller
 
         return view('hospital.doctors', [
             'doctors' => $this->publicDoctors()
-                ->when($input['department'] ?? null, fn (Builder $query, $id) => $query->where('doctors.department_id', $id))
+                ->when($input['department'] ?? null, fn (EloquentBuilder $query, $id) => $query->where('doctors.department_id', $id))
                 ->orderBy('doctors.id')->paginate(12)->withQueryString(),
-            'departments' => DB::table('departments')->where('status', 'ACTIVE')->orderBy('name')->get(['id', 'name']),
+            'departments' => Department::query()->where('status', 'ACTIVE')->orderBy('name')->get(['id', 'name']),
             'departmentId' => $input['department'] ?? null,
         ]);
     }
@@ -61,9 +64,10 @@ class HospitalDirectoryController extends Controller
         return view('hospital.doctor', compact('doctor', 'slots', 'today', 'lastDay'));
     }
 
-    private function publicDoctors(): Builder
+    /** @return EloquentBuilder<Doctor> */
+    private function publicDoctors(): EloquentBuilder
     {
-        return DB::table('doctors')
+        return Doctor::query()
             ->join('departments', 'departments.id', '=', 'doctors.department_id')
             ->join('users', 'users.id', '=', 'doctors.user_id')
             ->where('doctors.status', 'ACTIVE')->where('departments.status', 'ACTIVE')

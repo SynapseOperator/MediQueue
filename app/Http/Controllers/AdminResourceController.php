@@ -65,7 +65,7 @@ class AdminResourceController extends Controller
                     $before = null;
                 } else {
                     $old = DB::table('departments')->where('id', $id)->lockForUpdate()->first();
-                    abort_unless($old, 404);
+                    abort_unless($old !== null, 404);
                     $before = ['code' => $old->code, 'name' => $old->name, 'status' => $old->status];
                     DB::table('departments')->where('id', $id)->update($data + ['updated_at' => $now]);
                 }
@@ -107,7 +107,7 @@ class AdminResourceController extends Controller
             DB::transaction(function () use ($data, $id): void {
                 $old = $id === null ? null : DB::table('doctors')->where('id', $id)->first();
                 if ($id !== null) {
-                    abort_unless($old, 404);
+                    abort_unless($old !== null, 404);
                 }
                 $departmentIds = array_unique(array_filter([$old?->department_id, (int) $data['department_id']]));
                 sort($departmentIds);
@@ -126,8 +126,11 @@ class AdminResourceController extends Controller
                     if ($locked->department_id != $old->department_id) {
                         $this->fail('department_id', '医生归属已变化，请重试。');
                     }
-                    if ($locked->department_id != $data['department_id'] && DB::table('schedules')->where('doctor_id', $id)->lockForUpdate()->get()->isNotEmpty()) {
-                        $this->fail('department_id', '已有排班的医生不能转科。');
+                    if ($locked->department_id != $data['department_id']) {
+                        $existingSchedules = DB::table('schedules')->where('doctor_id', $id)->lockForUpdate()->get();
+                        if ($existingSchedules->isNotEmpty()) {
+                            $this->fail('department_id', '已有排班的医生不能转科。');
+                        }
                     }
                     $before = ['department_id' => $locked->department_id, 'status' => $locked->status];
                     DB::table('doctors')->where('id', $id)->update($data + ['updated_at' => $now]);
@@ -174,13 +177,13 @@ class AdminResourceController extends Controller
         DB::transaction(function () use ($data, $id): void {
             $old = $id === null ? null : DB::table('schedules')->where('id', $id)->first();
             if ($id !== null) {
-                abort_unless($old, 404);
+                abort_unless($old !== null, 404);
             }
             if ($old && $old->doctor_id != $data['doctor_id']) {
                 $this->fail('doctor_id', '不能更改排班医生。');
             }
             $doctor = DB::table('doctors')->where('id', $data['doctor_id'])->first();
-            abort_unless($doctor, 404);
+            abort_unless($doctor !== null, 404);
             $department = DB::table('departments')->where('id', $doctor->department_id)->lockForUpdate()->first();
             $lockedDoctor = DB::table('doctors')->where('id', $doctor->id)->lockForUpdate()->first();
             if ($lockedDoctor->department_id != $doctor->department_id) {
@@ -201,13 +204,14 @@ class AdminResourceController extends Controller
             if ($locked && ($locked->doctor_id != $doctor->id || $locked->department_id != $doctor->department_id)) {
                 $this->fail('doctor_id', '历史排班归属不能更改。');
             }
-            if (DB::table('schedules')->where('doctor_id', $doctor->id)->when($id, fn ($q) => $q->where('id', '<>', $id))->where(function ($q) use ($data) {
+            $conflictingSchedules = DB::table('schedules')->where('doctor_id', $doctor->id)->when($id, fn ($q) => $q->where('id', '<>', $id))->where(function ($q) use ($data) {
                 $q->where(function ($q) use ($data) {
                     $q->where('starts_at', '<', $data['ends_at'])->where('ends_at', '>', $data['starts_at']);
                 })->orWhere(function ($q) use ($data) {
                     $q->where('work_date', $data['work_date'])->where('session_code', $data['session_code']);
                 });
-            })->lockForUpdate()->get()->isNotEmpty()) {
+            })->lockForUpdate()->get();
+            if ($conflictingSchedules->isNotEmpty()) {
                 $this->fail('starts_at', '医生排班冲突或班次重复。');
             }
             if ($locked) {
@@ -216,8 +220,11 @@ class AdminResourceController extends Controller
                 if ($identityChanged && ($locked->starts_at <= $now || $data['starts_at'] <= $now)) {
                     $this->fail('starts_at', '已开始的排班不能修改时间，新的开始时间须在未来。');
                 }
-                if ($identityChanged && DB::table('appointments')->whereIn('slot_id', $slots->pluck('id'))->lockForUpdate()->get()->isNotEmpty()) {
-                    $this->fail('starts_at', '已有预约的排班时间和班次不可更改。');
+                if ($identityChanged) {
+                    $historicalAppointments = DB::table('appointments')->whereIn('slot_id', $slots->pluck('id'))->lockForUpdate()->get();
+                    if ($historicalAppointments->isNotEmpty()) {
+                        $this->fail('starts_at', '已有预约的排班时间和班次不可更改。');
+                    }
                 }
                 foreach ($slots as $slot) {
                     if ($slot->starts_at < $data['starts_at'] || $slot->ends_at > $data['ends_at']) {
@@ -265,13 +272,13 @@ class AdminResourceController extends Controller
         DB::transaction(function () use ($data, $id): void {
             $old = $id === null ? null : DB::table('slots')->where('id', $id)->first();
             if ($id !== null) {
-                abort_unless($old, 404);
+                abort_unless($old !== null, 404);
             }
             if ($old && $old->schedule_id != $data['schedule_id']) {
                 $this->fail('schedule_id', '不能更改号源所属排班。');
             }
             $schedule = DB::table('schedules')->where('id', $data['schedule_id'])->first();
-            abort_unless($schedule, 404);
+            abort_unless($schedule !== null, 404);
             $department = DB::table('departments')->where('id', $schedule->department_id)->lockForUpdate()->first();
             $doctor = DB::table('doctors')->where('id', $schedule->doctor_id)->lockForUpdate()->first();
             $schedule = DB::table('schedules')->where('id', $schedule->id)->lockForUpdate()->first();
@@ -293,15 +300,19 @@ class AdminResourceController extends Controller
             if ($data['starts_at'] < $schedule->starts_at || $data['ends_at'] > $schedule->ends_at) {
                 $this->fail('starts_at', '号源须在排班内。');
             }
-            if (DB::table('slots')->where('schedule_id', $schedule->id)->when($id, fn ($q) => $q->where('id', '<>', $id))->where('starts_at', '<', $data['ends_at'])->where('ends_at', '>', $data['starts_at'])->lockForUpdate()->get()->isNotEmpty()) {
+            $overlappingSlots = DB::table('slots')->where('schedule_id', $schedule->id)->when($id, fn ($q) => $q->where('id', '<>', $id))->where('starts_at', '<', $data['ends_at'])->where('ends_at', '>', $data['starts_at'])->lockForUpdate()->get();
+            if ($overlappingSlots->isNotEmpty()) {
                 $this->fail('starts_at', '号源时段重叠。');
             }
             if ($locked) {
                 if (($locked->starts_at !== $data['starts_at'] || $locked->ends_at !== $data['ends_at']) && ($locked->starts_at <= $now || $data['starts_at'] <= $now)) {
                     $this->fail('starts_at', '已开始的号源不能修改时间，新的开始时间须在未来。');
                 }
-                if (($locked->starts_at !== $data['starts_at'] || $locked->ends_at !== $data['ends_at']) && DB::table('appointments')->where('slot_id', $id)->lockForUpdate()->get()->isNotEmpty()) {
-                    $this->fail('starts_at', '已有预约的号源时间不可更改。');
+                if ($locked->starts_at !== $data['starts_at'] || $locked->ends_at !== $data['ends_at']) {
+                    $historicalAppointments = DB::table('appointments')->where('slot_id', $id)->lockForUpdate()->get();
+                    if ($historicalAppointments->isNotEmpty()) {
+                        $this->fail('starts_at', '已有预约的号源时间不可更改。');
+                    }
                 }
                 if ($data['capacity'] < $locked->occupied_count) {
                     $this->fail('capacity', '容量不能小于已占用数。');

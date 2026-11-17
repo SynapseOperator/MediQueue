@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\AppointmentStatus;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
@@ -28,7 +29,7 @@ class DoctorWorkbenchController extends Controller
         $slots = DB::table('slots')->where('schedule_id', $schedule->id)->orderBy('starts_at')->get();
         $patients = DB::table('appointments')->join('slots', 'slots.id', '=', 'appointments.slot_id')
             ->join('patients', 'patients.id', '=', 'appointments.patient_id')
-            ->where('slots.schedule_id', $schedule->id)->whereIn('appointments.status', ['CONFIRMED', 'COMPLETED'])
+            ->where('slots.schedule_id', $schedule->id)->whereIn('appointments.status', [AppointmentStatus::Confirmed->value, AppointmentStatus::Completed->value])
             ->select('appointments.appointment_no', 'patients.full_name as patient_name', 'appointments.status', 'slots.starts_at', 'slots.ends_at')
             ->orderBy('slots.starts_at')->orderBy('appointments.id')->paginate(20);
 

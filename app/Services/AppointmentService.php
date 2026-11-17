@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Enums\AppointmentStatus;
+use App\Enums\PaymentStatus;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\ConcurrencyErrorDetector;
 use Illuminate\Database\LostConnectionDetector;
@@ -22,7 +24,7 @@ class AppointmentService
         try {
             return DB::transaction(function () use ($userId, $slotId, $requestKey): int {
                 $patient = DB::table('patients')->where('user_id', $userId)->lockForUpdate()->first();
-                abort_unless($patient, 403, '需要有效的患者档案。');
+                abort_unless($patient !== null, 403, '需要有效的患者档案。');
                 $account = DB::table('users')->where('id', $userId)->sharedLock()->first();
                 abort_unless($account?->role === 'PATIENT' && $account->status === 'ACTIVE', 403);
 
@@ -69,9 +71,9 @@ class AppointmentService
                     ->where('appointments.patient_id', $patient->id)
                     ->where('slots.starts_at', '<', $slot->ends_at)->where('slots.ends_at', '>', $slot->starts_at)
                     ->where(function ($query) use ($now): void {
-                        $query->whereIn('appointments.status', ['CONFIRMED', 'COMPLETED'])
+                        $query->whereIn('appointments.status', [AppointmentStatus::Confirmed->value, AppointmentStatus::Completed->value])
                             ->orWhere(function ($query) use ($now): void {
-                                $query->where('appointments.status', 'PENDING_PAYMENT')->where('appointments.expires_at', '>', $now);
+                                $query->where('appointments.status', AppointmentStatus::PendingPayment->value)->where('appointments.expires_at', '>', $now);
                             });
                     })->exists();
                 if ($conflict) {
@@ -86,12 +88,12 @@ class AppointmentService
                 $expires = min($clock->addMinutes(15)->format('Y-m-d H:i:s.v'), $slot->starts_at);
                 $id = DB::table('appointments')->insertGetId([
                     'appointment_no' => 'A'.Str::ulid(), 'patient_id' => $patient->id, 'slot_id' => $slotId,
-                    'request_key' => $requestKey, 'status' => 'PENDING_PAYMENT', 'fee_amount' => $slot->fee_amount,
+                    'request_key' => $requestKey, 'status' => AppointmentStatus::PendingPayment->value, 'fee_amount' => $slot->fee_amount,
                     'expires_at' => $expires, 'created_at' => $now, 'updated_at' => $now,
                 ]);
                 $orderId = DB::table('payment_orders')->insertGetId([
                     'appointment_id' => $id, 'order_no' => 'O'.Str::ulid(), 'amount' => $slot->fee_amount,
-                    'currency' => 'CNY', 'channel' => 'MOCK_WECHAT', 'status' => 'UNPAID',
+                    'currency' => 'CNY', 'channel' => 'MOCK_WECHAT', 'status' => PaymentStatus::Unpaid->value,
                     'created_at' => $now, 'updated_at' => $now,
                 ]);
                 DB::table('audit_logs')->insert([
@@ -99,7 +101,7 @@ class AppointmentService
                     'target_type' => 'appointments', 'target_id' => $id, 'request_id' => $requestKey,
                     'before_state' => json_encode(['occupied_count' => $slot->occupied_count], JSON_THROW_ON_ERROR),
                     'after_state' => json_encode([
-                        'slot_id' => $slotId, 'payment_order_id' => $orderId, 'status' => 'PENDING_PAYMENT',
+                        'slot_id' => $slotId, 'payment_order_id' => $orderId, 'status' => AppointmentStatus::PendingPayment->value,
                         'fee_amount' => $slot->fee_amount, 'expires_at' => $expires, 'occupied_count' => $slot->occupied_count + 1,
                     ], JSON_THROW_ON_ERROR), 'created_at' => $now,
                 ]);
