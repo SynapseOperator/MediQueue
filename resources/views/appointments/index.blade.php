@@ -47,7 +47,7 @@
                     </div>
                     <a class="btn-secondary w-full shrink-0 sm:w-auto" href="{{ route('appointments.show', $appointment->id) }}">查看详情 →</a>
                 </div>
-                <div class="mt-5 border-t border-slate-100 pt-4 text-xs text-slate-400">预约编号：<span class="break-all">{{ $appointment->appointment_no }}</span></div>
+                <div class="mt-5 border-t border-slate-100 pt-4 text-xs text-slate-500">预约编号：<span class="break-all">{{ $appointment->appointment_no }}</span></div>
             </article>
         @empty
             <div class="empty-state">

@@ -24,7 +24,7 @@
 @layer base {
     html { scroll-behavior: smooth; }
     body {
-        min-width: 320px;
+        min-width: 0;
         color: var(--ink);
         background: radial-gradient(ellipse 68rem 34rem at 99% -12rem, #e1f2f8 0%, transparent 75%),
                     radial-gradient(ellipse 38rem 28rem at -12rem 17rem, #eaf5f6 0%, transparent 80%),
@@ -73,6 +73,8 @@
     .nav-mobile[open] > summary { background: #eaf5f8; border-color: #b4d5df; }
     .nav-drawer {
         @apply absolute right-0 top-full mt-3 w-[min(88vw,22rem)] rounded-2xl border p-3 shadow-2xl;
+        max-height: calc(100dvh - 5rem);
+        overflow-y: auto;
         border-color: #dae7ee;
         background: #fff;
         box-shadow: 0 22px 70px rgba(28, 67, 88, .18);
@@ -186,9 +188,9 @@
     .booking-slot:hover { border-color: #92c5d3; box-shadow: 0 12px 26px rgba(17, 89, 114, .085); }
     .booking-slot.is-full { background: #f7f9fb; box-shadow: none; }
     .slot-hour { @apply text-xl font-bold tracking-tight; color: #183c51; }
-    .slot-date { @apply text-xs font-bold tracking-wide; color: #6d7f92; }
+    .slot-date { @apply text-xs font-bold tracking-wide; color: #52657b; }
     .slot-capacity { @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold; color: #166f65; background: #e7f6f1; }
-    .slot-capacity.is-full { color: #7a8696; background: #e9edf2; }
+    .slot-capacity.is-full { color: #596c80; background: #e9edf2; }
 
     /* Admin: not every piece of information deserves an equally large card. */
     .metric-card { @apply relative overflow-hidden rounded-[1.25rem] border bg-white p-5 sm:p-6; border-color: #e2eaf1; }
@@ -199,13 +201,13 @@
     .metric-card--finance { background: #f4fafc; }
     .metric-label { @apply text-sm font-semibold; color: #53687b; }
     .metric-number { @apply mt-3 text-3xl font-bold tracking-tight sm:text-4xl; color: #192e45; }
-    .metric-note { @apply mt-3 text-xs leading-5; color: #758397; }
+    .metric-note { @apply mt-3 text-xs leading-5; color: #5d6e83; }
     .metric-index { @apply text-xs font-bold tracking-widest; color: #9bb4c3; }
     .metric-card--lead .metric-index { color: #b9e4eb; }
     .metric-card--compact .metric-number { @apply text-2xl sm:text-3xl; }
 
     .step-pill { @apply inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-bold; border-color: #cde4ec; background: #ebf7fa; color: #146e83; }
-    .empty-state { @apply rounded-[1.25rem] border border-dashed bg-white p-8 text-center; border-color: #cddfe8; color: #758497; }
+    .empty-state { @apply rounded-[1.25rem] border border-dashed bg-white p-8 text-center; border-color: #cddfe8; color: #5d6e83; }
     .soft-divider { border-color: #e8eef3; }
 }
 
