@@ -1,0 +1,89 @@
+{
+    "version": "8.4.13",
+    "schema": "mediqueue_perf_p6",
+    "checks": {
+        "appointments": 50000,
+        "orders": 50000,
+        "mismatches": 0
+    },
+    "rows": 50000,
+    "description": "50000 synthetic patients, 1000 one-minute slots, 50 expired-unreclaimed pending appointments per slot; all orders UNPAID.",
+    "experiments": {
+        "expiry": {
+            "normal": {
+                "sql": "SELECT id FROM appointments WHERE status='PENDING_PAYMENT' AND expires_at <= '2026-11-16 16:16:00' ORDER BY expires_at,id LIMIT 100",
+                "milliseconds": [
+                    0.3556,
+                    0.353,
+                    0.4037,
+                    0.2707,
+                    0.2778,
+                    0.2693,
+                    0.282
+                ],
+                "median_ms": 0.282,
+                "result_sha256": "5653fe90261a67ae9c5c18e5c49941b85eafeb43425b9545d5e3c31e94e3ef4b",
+                "rows_returned": 100,
+                "explain_analyze": [
+                    "-> Limit: 100 row(s)  (cost=5069 rows=100) (actual time=0.0273..0.0423 rows=100 loops=1)\n    -> Filter: ((appointments.`status` = 'PENDING_PAYMENT') and (appointments.expires_at <= TIMESTAMP'2026-11-16 16:16:00'))  (cost=5069 rows=24885) (actual time=0.0271..0.0394 rows=100 loops=1)\n        -> Covering index range scan on appointments using appointments_status_expires_at_id_index over (status = 'PENDING_PAYMENT' AND expires_at <= '2026-11-16 16:16:00.000')  (cost=5069 rows=24885) (actual time=0.026..0.0309 rows=100 loops=1)\n"
+                ]
+            },
+            "ignore_index": {
+                "sql": "SELECT id FROM appointments IGNORE INDEX (`appointments_status_expires_at_id_index`) WHERE status='PENDING_PAYMENT' AND expires_at <= '2026-11-16 16:16:00' ORDER BY expires_at,id LIMIT 100",
+                "milliseconds": [
+                    9.6541,
+                    10.656,
+                    10.4931,
+                    9.6413,
+                    8.865,
+                    9.5337,
+                    9.0813
+                ],
+                "median_ms": 9.6413,
+                "result_sha256": "5653fe90261a67ae9c5c18e5c49941b85eafeb43425b9545d5e3c31e94e3ef4b",
+                "rows_returned": 100,
+                "explain_analyze": [
+                    "-> Limit: 100 row(s)  (cost=5081 rows=100) (actual time=12.8..12.8 rows=100 loops=1)\n    -> Sort: appointments.expires_at, appointments.id, limit input to 100 row(s) per chunk  (cost=5081 rows=49770) (actual time=12.8..12.8 rows=100 loops=1)\n        -> Filter: ((appointments.`status` = 'PENDING_PAYMENT') and (appointments.expires_at <= TIMESTAMP'2026-11-16 16:16:00'))  (cost=5081 rows=49770) (actual time=0.0191..8.82 rows=50000 loops=1)\n            -> Covering index scan on appointments using appointments_slot_id_status_expires_at_id_index  (cost=5081 rows=49770) (actual time=0.0182..5.29 rows=50000 loops=1)\n"
+                ]
+            }
+        },
+        "patient_history": {
+            "normal": {
+                "sql": "SELECT id,created_at FROM appointments WHERE patient_id=42 ORDER BY created_at DESC,id DESC LIMIT 20",
+                "milliseconds": [
+                    0.2877,
+                    0.2189,
+                    0.2815,
+                    0.347,
+                    0.3403,
+                    0.2462,
+                    0.2204
+                ],
+                "median_ms": 0.2815,
+                "result_sha256": "77912acb9c66f2f70ec947702879ebf9eef409d1ac2fa5fe1c56cffec779b37f",
+                "rows_returned": 1,
+                "explain_analyze": [
+                    "-> Limit: 20 row(s)  (cost=0.35 rows=1) (actual time=0.0028..0.0035 rows=1 loops=1)\n    -> Covering index lookup on appointments using appointments_patient_id_created_at_id_index (patient_id=42) (reverse)  (cost=0.35 rows=1) (actual time=0.0023..0.003 rows=1 loops=1)\n"
+                ]
+            },
+            "ignore_index": {
+                "sql": "SELECT id,created_at FROM appointments IGNORE INDEX (`appointments_patient_id_created_at_id_index`) WHERE patient_id=42 ORDER BY created_at DESC,id DESC LIMIT 20",
+                "milliseconds": [
+                    0.1658,
+                    0.1594,
+                    0.1563,
+                    0.1601,
+                    0.1596,
+                    0.154,
+                    0.1542
+                ],
+                "median_ms": 0.1594,
+                "result_sha256": "77912acb9c66f2f70ec947702879ebf9eef409d1ac2fa5fe1c56cffec779b37f",
+                "rows_returned": 1,
+                "explain_analyze": [
+                    "-> Limit: 20 row(s)  (cost=0.35 rows=1) (actual time=0.0066..0.0067 rows=1 loops=1)\n    -> Sort: appointments.created_at DESC, appointments.id DESC, limit input to 20 row(s) per chunk  (cost=0.35 rows=1) (actual time=0.0063..0.0063 rows=1 loops=1)\n        -> Index lookup on appointments using appointments_patient_id_request_key_unique (patient_id=42)  (cost=0.35 rows=1) (actual time=0.003..0.0034 rows=1 loops=1)\n"
+                ]
+            }
+        }
+    }
+}
