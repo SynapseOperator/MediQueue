@@ -35,7 +35,7 @@
                         <span class="rounded-full bg-[#e6f6f1] px-3 py-1 text-xs font-bold text-teal-700">流程示意</span>
                     </div>
                     <ol class="mt-5 space-y-3">
-                        <li class="journey-step"><span class="step-num">01</span><div><p class="font-bold text-slate-800">查看医生与出诊</p><p class="mt-0.5 text-xs text-slate-500">选择科室、医生和可预约时段</p></div></li>
+                        <li class="journey-step"><span class="step-num">01</span><div><p class="font-bold text-slate-800">选择医生与时段</p><p class="mt-0.5 text-xs text-slate-500">选择科室、医生和可预约时段</p></div></li>
                         <li class="journey-step"><span class="step-num">02</span><div><p class="font-bold text-slate-800">核对预约信息</p><p class="mt-0.5 text-xs text-slate-500">确认挂号费与预约截止时间</p></div></li>
                         <li class="journey-step"><span class="step-num">03</span><div><p class="font-bold text-slate-800">查看进度与结果</p><p class="mt-0.5 text-xs text-slate-500">模拟支付及退款状态清晰可查</p></div></li>
                     </ol>
