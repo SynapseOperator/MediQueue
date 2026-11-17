@@ -1,10 +1,10 @@
 # 参与 MediQueue
 
-MediQueue 是使用合成数据的医院预约课程项目。当前工作范围为 P4 模拟支付及预约生命周期；业务功能和验收以 [CODEX_START_PROMPT.md](CODEX_START_PROMPT.md) 与 [docs/spec](docs/spec/) 中的 V1.1 文件为准，阶段与合并授权遵循负责人最新决定。业务规则已冻结，改变规则或扩展范围需要项目负责人确认。
+MediQueue 是使用合成数据的医院预约课程项目。当前工作范围为 P5 页面、统计与课程 SQL；下一阶段为 P6 综合验收与报告；业务功能和验收以 [CODEX_START_PROMPT.md](CODEX_START_PROMPT.md) 与 [docs/spec](docs/spec/) 中的 V1.1 文件为准，阶段与合并授权遵循负责人最新决定。业务规则已冻结，改变规则或扩展范围需要项目负责人确认。
 
 ## 提交变更
 
-1. 从已验收的 `main` 创建 `feat/...` 或 `fix/...` 分支；P4 使用 `feat/p4-mock-payment-lifecycle`。
+1. 从已验收的 `main` 创建 `feat/...` 或 `fix/...` 分支；P5 使用 `feat/p5-ui-analytics-sql`。
 2. 保持修改聚焦，复用现有模式，避免无使用场景的抽象。新增功能应有对应测试。
 3. 按 README 配置本地环境，运行 Composer 校验、PHP 风格/语法检查、真实 MySQL 测试及前端构建；使用实际命令和结果填写 PR。
 4. 推送功能分支并创建 Draft PR。CI 失败应修复原因，不能删除有效检查换取通过。
@@ -15,7 +15,7 @@ MediQueue 是使用合成数据的医院预约课程项目。当前工作范围�
 ## 数据与实现约束
 
 - 关键数据库测试必须使用 MySQL 8.x，不能以 SQLite 结果替代。
-- 迁移使用结构管理账号，应用运行使用独立的业务读写账号；配置凭据仅保存在本地或 CI 的适当配置中。
+- 应用库依次使用 `php scripts/run-schema.php migrate` 和 `php scripts/run-schema.php grant`；测试库使用 `php scripts/run-schema.php testing`，测试使用 `php scripts/run-schema.php test`。报告函数安装需要短期 CLI DBA 凭据；常驻应用仅 DML 与两个报告例程的 EXECUTE，不关闭 binlog 信任边界。详见 [SQL 说明](docs/database/p5-sql.md)。
 - 演示资料必须为合成数据；不得提交 `.env`、令牌、数据库转储、敏感日志、`vendor`、`node_modules` 或构建产物。
 - 付款与退款仅为明确标注的 `MOCK_WECHAT` 模拟流程，不发生真实资金交易，不使用真实微信商户配置。
 - 维护事务、统一锁顺序、幂等、金额快照和历史保护；不要以界面按钮禁用代替服务端校验。
