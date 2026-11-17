@@ -16,7 +16,9 @@
 | 报告与答辩 | [14部分Markdown报告与配图](docs/report/MediQueue-course-report.md) · [5–7分钟提纲](docs/report/defense-outline.md) |
 | 启动演示 | [Windows原生MySQL启动、健康检查与独立场景](docs/windows-demo.md) |
 
-![真实管理员看板，数据为合成演示资料](docs/verification/screenshots/p6/dashboard.jpg)
+![真实新版首页，数据为合成演示资料](docs/verification/screenshots/ui-refresh/home-1440.jpg)
+
+[界面升级与视觉验收](docs/verification/ui-refresh-browser.md)：响应式导航、医生时段卡片、预约确认、模拟收银台及统计层次；所有显示仍来自服务端真实合成数据。
 
 本期支付路线仅为 **模拟微信支付／无实际扣款**，不接入真实商户。所有演示资料均须为合成数据。模拟开关默认关闭，仅允许显式 local/demo/testing 环境启用，production 即使开关打开也拒绝模拟付款及退款。
 
