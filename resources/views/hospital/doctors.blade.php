@@ -1,17 +1,50 @@
 @extends('layouts.app')
 @section('title', '医生列表')
 @section('content')
-    <p class="eyebrow">医院资源</p><h1 class="page-title mt-2">医生与出诊安排</h1>
-    <form method="GET" action="{{ route('doctors.index') }}" class="surface-muted mt-6 flex flex-wrap items-end gap-3">
-        <label class="field min-w-52">选择科室<select name="department"><option value="">全部科室</option>@foreach($departments as $department)<option value="{{ $department->id }}" @selected((string)$departmentId === (string)$department->id)>{{ $department->name }}</option>@endforeach</select></label>
-        <button class="btn" type="submit">筛选</button>
+    <div class="flex flex-wrap items-end justify-between gap-4">
+        <div>
+            <p class="eyebrow">FIND YOUR DOCTOR · 医生导览</p>
+            <h1 class="page-title mt-2">找到合适的医生</h1>
+            <p class="page-intro">按科室筛选开放医生，查看专业方向与近期出诊时段。</p>
+        </div>
+        <a class="btn-secondary" href="{{ route('departments.index') }}">浏览全部科室</a>
+    </div>
+    <form method="GET" action="{{ route('doctors.index') }}" class="panel mt-7 flex flex-wrap items-end gap-4">
+        <label class="field w-full flex-1 sm:min-w-60">选择科室
+            <select name="department"><option value="">全部科室</option>@foreach($departments as $department)<option value="{{ $department->id }}" @selected((string)$departmentId === (string)$department->id)>{{ $department->name }}</option>@endforeach</select>
+        </label>
+        <button class="btn w-full sm:w-auto" type="submit">查看医生</button>
     </form>
-    <div class="mt-8 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+    <div class="mt-8 flex items-center justify-between gap-4">
+        <h2 class="text-sm font-bold text-slate-600">当前筛选结果</h2>
+        <span class="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-500">共 {{ $doctors->total() }} 位医生</span>
+    </div>
+    <div class="mt-4 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
         @forelse($doctors as $doctor)
-            <article class="panel flex flex-col"><div aria-hidden="true" class="mb-5 grid h-12 w-12 place-items-center rounded-2xl bg-[#e5f2ef] text-lg font-bold text-teal-700">医</div><p class="eyebrow">{{ $doctor->department_name }}</p><h2 class="mt-2 text-xl font-semibold">{{ $doctor->full_name }} <span class="text-sm font-normal text-slate-500">{{ $doctor->title }}</span></h2><p class="mt-4 leading-7 text-slate-600">{{ $doctor->specialty ?: '暂未填写专长介绍。' }}</p><a class="text-link mt-auto inline-block pt-6" href="{{ route('doctors.show', $doctor->id) }}">简介与出诊时段 →</a></article>
+            <article class="doctor-card">
+                <div class="doctor-portrait">
+                    <div class="doctor-avatar" aria-hidden="true">医</div>
+                    <span class="absolute bottom-3 right-4 rounded-full bg-white/95 px-3 py-1 text-xs font-bold text-[#167288]">当前开放</span>
+                </div>
+                <div class="flex flex-1 flex-col p-6">
+                    <p class="eyebrow">{{ $doctor->department_name }}</p>
+                    <div class="mt-2 flex flex-wrap items-baseline gap-2">
+                        <h3 class="text-xl font-bold text-slate-800">{{ $doctor->full_name }}</h3>
+                        <span class="text-sm font-medium text-slate-500">{{ $doctor->title }}</span>
+                    </div>
+                    <p class="mt-4 line-clamp-2 min-h-12 text-sm leading-6 text-slate-600">{{ $doctor->specialty ?: '可查看医生详情与目前开放的出诊安排。' }}</p>
+                    <div class="mt-auto border-t border-slate-100 pt-5">
+                        <a class="btn w-full" href="{{ route('doctors.show', $doctor->id) }}">查看简介与出诊时段 <span aria-hidden="true">→</span></a>
+                    </div>
+                </div>
+            </article>
         @empty
-            <p class="panel col-span-full text-slate-600">当前筛选下暂无开放医生。</p>
+            <div class="empty-state col-span-full">
+                <p class="text-lg font-bold text-slate-700">当前没有符合条件的医生</p>
+                <p class="mt-2 text-sm">可以尝试选择其他科室，或稍后再来查看。</p>
+                <a class="btn-secondary mt-5" href="{{ route('doctors.index') }}">显示全部科室</a>
+            </div>
         @endforelse
     </div>
-    <div class="mt-7">{{ $doctors->links() }}</div>
+    <div class="mt-8">{{ $doctors->links() }}</div>
 @endsection
