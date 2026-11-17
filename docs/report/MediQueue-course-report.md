@@ -1,6 +1,6 @@
 # MediQueue 医院预约挂号系统：数据库课程设计报告
 
-版本：P6 课程报告。仓库：[SynapseOperator/MediQueue](https://github.com/SynapseOperator/MediQueue)；本地项目：`D:\Bread_coding\MediQueue`。需求基线为三份V1.1规格，本文记录P0—P6工程、验收、性能与恢复事实，远端最终状态以最新PR和main检查为准。只使用合成数据和可追溯记录，不代表真实医院服务或安全认证。
+版本：P6 课程报告。仓库：[SynapseOperator/MediQueue](https://github.com/SynapseOperator/MediQueue)。需求基线为三份V1.1规格，本文记录P0—P6工程、验收、性能与恢复事实，远端最终状态以最新PR和main检查为准。只使用合成数据和可追溯记录，不代表真实医院服务或安全认证。
 
 **全部“付款、退款、净额”均为MOCK_WECHAT本地模拟，无微信商户接入、无真实资金流转。** 教师是否接受模拟方式满足任务书“在线挂号支付”，仍须课程验收方确认。
 
@@ -20,7 +20,7 @@
 | 管理员 | 科室医生、排班号源、停诊逐项处理、退款、人工完成、统计审计 | 停诊不批量取消，完成需核实，失败退款继续可见 |
 | 系统 | 定时与预约前按需回收 | 只在真实到期转换后释放，停用患者仍可清理 |
 
-区间为半开`[start,end)`，相邻不冲突。创建立即占一个名额，截止为`min(锁内创建时间+15分钟, 时段开始)`。患者只在开始前取消；管理员可带原因处理尚未就诊的异常记录；COMPLETED不回退取消且不释放名额。完整AC对应关系见[验收矩阵](../verification/p6-acceptance-matrix.md)。
+区间为半开`[start,end)`，相邻不冲突。创建立即占一个名额，截止为`min(锁内创建时间+15分钟, 时段开始)`。患者只在开始前取消；管理员可带原因处理尚未就诊的异常记录；COMPLETED不回退取消且不释放名额。完整AC对应关系见[验收矩阵](../archive/verification/p6-acceptance-matrix.md)。
 
 ## 3. 总体架构
 
@@ -169,41 +169,41 @@ slotX锁加`occupied_count < capacity`条件更新保护最后名额；父资源
 
 ## 9. 功能实现与实际截图
 
-以下复用2026-11-17的P5真实Chrome截图，均为合成资料，非本轮重新拍摄或效果图。详见[P5浏览器记录](../verification/p5-browser.md)，数字仅代表对应时点。
+以下复用2026-11-17的P5真实Chrome截图，均为合成资料，非本轮重新拍摄或效果图。详见[P5浏览器记录](../archive/verification/p5-browser.md)，数字仅代表对应时点。
 
-![P5首页](../verification/screenshots/p5/home.jpg)
+![P5首页](../archive/verification/screenshots/p5/home.jpg)
 
 图1：公开科室和医生入口，读取真实启用资源，无在线诊疗功能。
 
-![P5预约确认](../verification/screenshots/p5/confirm.jpg)
+![P5预约确认](../archive/verification/screenshots/p5/confirm.jpg)
 
 图2：本人资料、时间、金额核对。GET不占号，POST进入原事务。
 
-![P5模拟收银台](../verification/screenshots/p5/payment.jpg)
+![P5模拟收银台](../archive/verification/screenshots/p5/payment.jpg)
 
 图3：明确无实际扣款，Session、短期签名、CSRF和本人归属保护入口。
 
-![P5退款失败](../verification/screenshots/p5/refund-failed.jpg)
+![P5退款失败](../archive/verification/screenshots/p5/refund-failed.jpg)
 
 图4：失败为独立退款结果；预约仍取消、容量不回占，管理员沿原退款重试。
 
-![P5医生只读名单](../verification/screenshots/p5/doctor-schedule.jpg)
+![P5医生只读名单](../archive/verification/screenshots/p5/doctor-schedule.jpg)
 
 图5：本人CONFIRMED/COMPLETED名单，不展示患者联系方式和无关付款资料。
 
-![P5统计](../verification/screenshots/p5/analytics.jpg)
+![P5统计](../archive/verification/screenshots/p5/analytics.jpg)
 
-图6：日期、科室与创建趋势。P5人工样本容量18、占用1、模拟付款64.68、成功退款44.68、净额20.00，与[脱敏数据库证据](../verification/p5-database.json)一致。
+图6：日期、科室与创建趋势。P5人工样本容量18、占用1、模拟付款64.68、成功退款44.68、净额20.00，与[脱敏数据库证据](../archive/verification/p5-database.json)一致。
 
-[P6浏览器记录](../verification/p6-browser.md)另真实完成预约7本人取消退款成功、预约8停诊后逐条取消及同一退款FAILED→SUCCEEDED、历史合成预约6人工完成、看板/审计和医生只读名单。医生直接GET管理员资源页403；未在浏览器提交医生修改POST或尝试患者他人预约URL，这些仍由HTTP测试证明。本轮390px实际复核医生工作台、患者时段横向操作/确认/本人退款，以及管理员状态筛选/退款详情/统计/审计；移动补验只浏览已有业务，没有新增预约或修改状态。
+[P6浏览器记录](../archive/verification/p6-browser.md)另真实完成预约7本人取消退款成功、预约8停诊后逐条取消及同一退款FAILED→SUCCEEDED、历史合成预约6人工完成、看板/审计和医生只读名单。医生直接GET管理员资源页403；未在浏览器提交医生修改POST或尝试患者他人预约URL，这些仍由HTTP测试证明。本轮390px实际复核医生工作台、患者时段横向操作/确认/本人退款，以及管理员状态筛选/退款详情/统计/审计；移动补验只浏览已有业务，没有新增预约或修改状态。
 
-![P6真实退款失败](../verification/screenshots/p6/refund-failed.jpg)
+![P6真实退款失败](../archive/verification/screenshots/p6/refund-failed.jpg)
 
 图7：本轮停诊处理产生的原退款先失败，随后沿同一退款重试成功；这张图保留失败时刻，不用最终状态覆盖演示历史。
 
 ## 10. 测试与异常处理
 
-本轮实际命令`php scripts/run-schema.php test --compact --no-ansi --log-junit test-results/p6-local-junit.xml`退出0：**234 tests、2939 assertions、0 failures / errors / skipped**，最终JUnit更新于2026-11-17 10:23:34 UTC，用例合计30.128145秒。[公开摘要](../verification/p6-local-results.json)保留JUnit哈希及并发证据清单。P5为229测试，本轮新增P6直接验收3项、演示场景2项；远端最新提交CI单独确认。
+本轮实际命令`php scripts/run-schema.php test --compact --no-ansi --log-junit test-results/p6-local-junit.xml`退出0：**234 tests、2939 assertions、0 failures / errors / skipped**，最终JUnit更新于2026-11-17 10:23:34 UTC，用例合计30.128145秒。[公开摘要](../archive/verification/p6-local-results.json)保留JUnit哈希及并发证据清单。P5为229测试，本轮新增P6直接验收3项、演示场景2项；远端最新提交CI单独确认。
 
 | 测试层 | 源码 | 证明与限制 |
 |---|---|---|
@@ -219,13 +219,13 @@ P3实测20进程最后一号为1成功19拒绝；P4九类竞争核对状态、�
 
 结果未知保留原请求键，提示查原记录。密码只存哈希，不回填；审计只记必要状态。没有将通过测试等同完成渗透测评。
 
-CI保留quality/mysql/frontend/secrets，包括质量、依赖审计、前端构建、真实MySQL和Gitleaks；上传JUnit与并发JSON。P6最新PR和main结果在[阶段交付](../verification/P6.md)所指的PR记录中核对，不用旧绿灯替代。
+CI保留quality/mysql/frontend/secrets，包括质量、依赖审计、前端构建、真实MySQL和Gitleaks；上传JUnit与并发JSON。P6最新PR和main结果在[阶段交付](../archive/verification/P6.md)所指的PR记录中核对，不用旧绿灯替代。
 
 ## 11. 性能实验
 
 实测命令`php scripts/performance/run-v2.php`退出0，在独立库`mediqueue_perf_p6_v2`保存同版结构和5万预约/订单。100名合成患者每人500条不重叠预约，1000个slot各50条；全部是已过期未回收PENDING_PAYMENT / UNPAID，直接合成而非逐条走HTTP，不含逐操作审计。外键开启；关系、状态、金额、时间异常、患者重叠、无效哈希、容量账实差异均0。第一轮每患者一条的弱分布证据保留，不能据此证明历史索引收益。
 
-环境为Windows / Intel Core i9-13900HX / 内存34,033,319,936字节 / MySQL8.4.13，buffer pool128MiB、binlog开启。独立PDO为服务器默认REPEATABLE READ，应用为READ COMMITTED；只比较只读查询，不能外推事务竞争。每查询预热一次再测7次，计时含本机PHP/PDO往返与取数。`IGNORE INDEX`仅影响对照SQL，没有删除索引或修改业务schema。完整SQL、7轮数据、结果SHA-256及执行计划见[性能报告](../performance/p6-report.md)和[v2 JSON](../performance/p6-results-v2.json)。
+环境为Windows / 24核32逻辑处理器 / 内存34,033,319,936字节 / MySQL8.4.13，buffer pool128MiB、binlog开启。独立PDO为服务器默认REPEATABLE READ，应用为READ COMMITTED；只比较只读查询，不能外推事务竞争。每查询预热一次再测7次，计时含本机PHP/PDO往返与取数。`IGNORE INDEX`仅影响对照SQL，没有删除索引或修改业务schema。完整SQL、7轮数据、结果SHA-256及执行计划见[性能报告](../performance/p6-report.md)和[v2 JSON](../performance/p6-results-v2.json)。
 
 | 查询 | 正常中位数ms | 忽略目标索引ms | 实际计划与结论 |
 |---|---:|---:|---|
@@ -240,7 +240,7 @@ EXPLAIN ANALYZE实际执行语句，给出迭代时间/行数，不是客户端�
 
 ## 12. 备份恢复
 
-[backup-restore.php](../../scripts/backup-restore.php)已将源`mediqueue`逻辑备份并恢复到最终复核的新库`mediqueue_restore_p6_20261117_verified`，命令参数包含本机MySQL工具目录与唯一label，不覆盖已有目标。公开[原始摘要](../verification/p6-backup-results.json)记录：
+[backup-restore.php](../../scripts/backup-restore.php)已将源`mediqueue`逻辑备份并恢复到最终复核的新库`mediqueue_restore_p6_20261117_verified`，命令参数包含本机MySQL工具目录与唯一label，不覆盖已有目标。公开[原始摘要](../archive/verification/p6-backup-results.json)记录：
 
 | 实际步骤 | 退出码 | 秒 |
 |---|---:|---:|
@@ -255,7 +255,7 @@ EXPLAIN ANALYZE实际执行语句，给出迭代时间/行数，不是客户端�
 
 核心表为InnoDB，mysqldump单事务可取事务表一致快照，但备份期间应避免DDL。[MySQL mysqldump官方说明](https://dev.mysql.com/doc/refman/8.4/en/mysqldump.html) 本次schema/data分开导出，要求演示停止写入，并以前后指纹核验源未变化；不是不停写情况下的跨两次导出一致性保证。SQL文件也不等同运行配置、数据库账号权限或完整系统镜像。
 
-原始SQL含账号哈希与会话，只留ACL受限`.local/backups/20261117_verified`，不提交。早先`20261117_final`恢复库也保留，没有覆盖删除。公开摘要包含文件大小与校验和，不含行数据或凭据。此次为同机MySQL8.4.13逻辑恢复演练，不声称跨版本、异机灾难或按binlog时间点恢复已经验证。完整实际子命令、导出权限、外键核验和边界见[备份恢复记录](../verification/p6-backup-restore.md)。
+原始SQL含账号哈希与会话，只留ACL受限`.local/backups/20261117_verified`，不提交。早先`20261117_final`恢复库也保留，没有覆盖删除。公开摘要包含文件大小与校验和，不含行数据或凭据。此次为同机MySQL8.4.13逻辑恢复演练，不声称跨版本、异机灾难或按binlog时间点恢复已经验证。完整实际子命令、导出权限、外键核验和边界见[备份恢复记录](../archive/verification/p6-backup-restore.md)。
 
 ## 13. 总结与改进
 
@@ -271,7 +271,7 @@ EXPLAIN ANALYZE实际执行语句，给出迭代时间/行数，不是客户端�
 
 - [PRD V1.1](../spec/MediQueue_PRD_V1.1.md)、[数据库设计](../spec/MediQueue_Database_Design_V1.1.md)、[模拟支付设计](../spec/MediQueue_Mock_WeChat_Payment_Design_V1.1.md)。
 - [字段字典与ER](../architecture/p1-database-schema.md)、[预约ADR](../architecture/adr-0004-p3-appointments.md)、[生命周期ADR](../architecture/adr-0005-p4-lifecycle.md)、[统计口径](../architecture/p5-analytics.md)、[SQL权限](../database/p5-sql.md)。
-- [AC矩阵](../verification/p6-acceptance-matrix.md)、[P3](../verification/P3.md)、[P4](../verification/P4.md)、[P5](../verification/P5.md)、[答辩提纲](defense-outline.md)。
+- [AC矩阵](../archive/verification/p6-acceptance-matrix.md)、[P3](../archive/verification/P3.md)、[P4](../archive/verification/P4.md)、[P5](../archive/verification/P5.md)、[答辩提纲](defense-outline.md)。
 
 2026-11-17实际在线核对的官方技术参考：
 
@@ -280,4 +280,4 @@ EXPLAIN ANALYZE实际执行语句，给出迭代时间/行数，不是客户端�
 3. [MySQL 8.4 EXPLAIN](https://dev.mysql.com/doc/refman/8.4/en/explain.html)：估算与实际迭代统计。
 4. [MySQL 8.4 mysqldump](https://dev.mysql.com/doc/refman/8.4/en/mysqldump.html)：单事务备份及并发DDL限制。
 
-源码附录：`database/migrations/`为可执行结构，`app/Services/`为业务写入口，`tests/Feature/`为真实MySQL测试，`docs/verification/`为实际阶段记录和截图。复现前读README并选择正确数据源，不使用`migrate:fresh`清空已有业务库。
+源码附录：`database/migrations/`为可执行结构，`app/Services/`为业务写入口，`tests/Feature/`为真实MySQL测试，`docs/archive/verification/`为实际阶段记录和截图。复现前读README并选择正确数据源，不使用`migrate:fresh`清空已有业务库。

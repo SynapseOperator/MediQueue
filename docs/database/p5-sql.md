@@ -60,4 +60,4 @@ SELECT fn_intervals_overlap('2026-11-17 01:00:00', '2026-11-17 01:30:00',
 
 本机实际创建、回滚和重建四个对象均退出0；`ReportingSqlTest` 六项与 `ReportingMigrationTest` 一项在真实 MySQL 8.4.13 通过。过程的小样本在同号源多预约时容量仍为5；五状态夹具中存储占用3与有效预约3一致；故意少记/多记分别产生负/正差值。非法区间及日期收到 SQLSTATE 45000。运行账号可读两个视图并 EXECUTE 两个例程，但 CREATE TABLE 被1142拒绝。普通应用启动读取的 `routine_ddl` 配置为不存在。
 
-全量结果及逐项人工核对见 [P5验证](../verification/P5.md)，真实浏览器后的无凭据数据库状态见 [P5数据库证据](../verification/p5-database.json)。部署运行器校验固定目标库，并覆盖继承的 DB 连接环境变量；遇到缓存配置则退出2，需先在普通环境执行 `php artisan config:clear`。不要将短时管理连接缓存成应用配置。
+全量结果及逐项人工核对见 [P5验证](../archive/verification/P5.md)，真实浏览器后的无凭据数据库状态见 [P5数据库证据](../archive/verification/p5-database.json)。部署运行器校验固定目标库，并覆盖继承的 DB 连接环境变量；遇到缓存配置则退出2，需先在普通环境执行 `php artisan config:clear`。不要将短时管理连接缓存成应用配置。

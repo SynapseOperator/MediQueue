@@ -1,24 +1,42 @@
-# 参与 MediQueue
+# Contributing to MediQueue
 
-MediQueue 是使用合成数据的医院预约课程项目，已完成P0–P6计划实现与本地验证。最终证据见 [P6交付](docs/verification/P6.md)；业务功能和验收以 [CODEX_START_PROMPT.md](CODEX_START_PROMPT.md) 与 [docs/spec](docs/spec/) 中的 V1.1 文件为准，阶段与合并授权遵循负责人最新决定。业务规则已冻结，改变规则或扩展范围需要项目负责人确认。
+欢迎改进文档、可访问性、测试和实现。先运行 [一键演示](README.md#快速开始)，再读与你的修改相关的 [并发设计](docs/design/concurrency.md) 或 [数据库结构](docs/architecture/p1-database-schema.md)。英文贡献也欢迎。
 
-## 提交变更
+## 开始一个改动
 
-1. 从已验收的 `main` 创建 `feat/...` 或 `fix/...` 分支；P6 使用 `feat/p6-final-validation`。
-2. 保持修改聚焦，复用现有模式，避免无使用场景的抽象。新增功能应有对应测试。
-3. 按 README 配置本地环境，运行 Composer 校验、PHP 风格/语法检查、真实 MySQL 测试及前端构建；使用实际命令和结果填写 PR。
-4. 推送功能分支并创建 Draft PR。CI 失败应修复原因，不能删除有效检查换取通过。
-5. 所有必需 CI 检查通过后标记 Ready for Review。负责人已授权在本地检查、独立复核及最新提交的必需 CI 均通过且无遗留问题时自行合并；遇到需负责人决定的问题先报告。不得绕过保护、直接推送 `main` 或 force push `main`。
+1. 从 `main` 新建 `feat/...`、`fix/...` 或 `docs/...` 分支。入门可看 [good first issue](https://github.com/SynapseOperator/MediQueue/issues?q=is%3Aissue%20is%3Aopen%20label%3A%22good%20first%20issue%22)。
+2. 保持一个 PR 聚焦一个问题。改变预约、权限、时间或金额规则前，先开 Issue 讨论行为与兼容性。
+3. 提交信息说明实际变化，例如 `fix: preserve request key after validation error`。不要求特定提交工具。
+4. PR 写清问题、修改后行为和实际验证；页面改动附截图，未运行的检查如实注明。CI 通过后请求复核，不绕过分支保护。
 
-阶段未验收前，不提前开始下一阶段。PR 应说明设计依据、行为变化、验证结果、剩余风险，以及相关日志或截图链接；未运行的检查明确标记“未验证”。
+## 运行检查
 
-## 数据与实现约束
+演示环境启动后，可直接用开发镜像执行完整真实 MySQL 测试；它使用独立测试库，保留演示业务库：
 
-- 关键数据库测试必须使用 MySQL 8.x，不能以 SQLite 结果替代。
-- 应用库依次使用 `php scripts/run-schema.php migrate` 和 `php scripts/run-schema.php grant`；测试库使用 `php scripts/run-schema.php testing`，测试使用 `php scripts/run-schema.php test`。报告函数安装需要短期 CLI DBA 凭据；常驻应用仅 DML 与两个报告例程的 EXECUTE，不关闭 binlog 信任边界。详见 [SQL 说明](docs/database/p5-sql.md)。
-- 演示资料必须为合成数据；不得提交 `.env`、令牌、数据库转储、敏感日志、`vendor`、`node_modules` 或构建产物。
-- 付款与退款仅为明确标注的 `MOCK_WECHAT` 模拟流程，不发生真实资金交易，不使用真实微信商户配置。
-- 维护事务、统一锁顺序、幂等、金额快照和历史保护；不要以界面按钮禁用代替服务端校验。
-- 并发测试使用独立连接或进程及可重复的同步启动方式，并保留实际结果。
+```sh
+docker compose --profile test run --build --rm tests --compact
+```
 
-安全问题请遵循 [SECURITY.md](SECURITY.md)，不要在公开 Issue 或 PR 中披露敏感细节。
+使用 [严格开发环境](docs/development/strict-mode.md) 安装 PHP 8.4 和 Node 时，执行完整本地检查：
+
+```sh
+composer validate --strict
+composer lint
+composer analyse
+composer audit
+npm ci
+npm audit --audit-level=low
+npm run build
+php scripts/run-schema.php test --log-junit test-results/junit.xml
+```
+
+MySQL 是测试目标，SQLite 不能替代核心验证。同一个测试库不要同时运行两套测试；只跑竞态可加 `--filter=ConcurrencyTest`。保留既有有效测试，新增测试应证明具体行为，避免机械复制实现。
+
+## 需要保持的边界
+
+- 核心写入保持原子性、统一锁顺序、幂等与金额快照。普通读取可以使用 Eloquent，锁与事务必须保持清晰。
+- 数据和图片只用合成资料；不提交环境文件、密码、数据库备份、会话或完整内部日志。
+- 支付与退款只模拟，不向真实渠道发起资金交易。
+- 安全问题按 [SECURITY.md](SECURITY.md) 私下报告；一般使用问题放 [Discussions](https://github.com/SynapseOperator/MediQueue/discussions)。
+
+AI 工具可以辅助贡献，但贡献者需要理解改动、核对证据并对提交负责。

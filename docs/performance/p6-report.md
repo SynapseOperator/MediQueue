@@ -1,6 +1,6 @@
 # P6 独立性能实验
 
-2026-11-17，本机 MySQL 8.4.13，Windows，Alienware m16 R1，内存约 34.0 GB。实验运行于独立 `mediqueue_perf_p6`，按项目迁移建立同版结构，未修改业务库或删除业务索引。`php scripts/performance/run.php` 仅在该库不存在时创建；已有实验库默认拒绝覆盖，`--measure-existing` 仅用于本次合成数据测量并会更新该库中的合成时间戳。脚本需要本地 `.env.migration` 和 `.env.database`；管理员密码只在进程内读取，不写入参数或结果。不要将此命令指向业务数据库。
+2026-11-17，本机 MySQL 8.4.13，Windows，内存约 34.0 GB。实验运行于独立 `mediqueue_perf_p6`，按项目迁移建立同版结构，未修改业务库或删除业务索引。`php scripts/performance/run.php` 仅在该库不存在时创建；已有实验库默认拒绝覆盖，`--measure-existing` 仅用于本次合成数据测量并会更新该库中的合成时间戳。脚本需要本地 `.env.migration` 和 `.env.database`；管理员密码只在进程内读取，不写入参数或结果。不要将此命令指向业务数据库。
 
 数据：50,000 虚构患者各一条预约、1,000 个不重叠时段各 50 个名额，50,000 个待支付订单；均为过期未回收的待支付，号源占用均为 50。预约创建时在可预约窗口，15 分钟截止早于时段开始；无退款。数据库检查预约 50,000、订单 50,000、占用差异 0。它是均匀、单状态的合成负载，不代表真实医院流量，也不衡量全业务吞吐。
 
@@ -17,7 +17,7 @@
 
 独立数据库 `mediqueue_perf_p6_v2`，由 `php scripts/performance/run-v2.php` 创建；若库已存在则拒绝覆盖。数据为 100 个合成患者各 500 条互不重叠的待支付预约、1,000 个时段各 50 条预约和订单，共 50,000 条；创建时间距就诊约一天、付款期限 15 分钟，测试时间均已过期但未回收。该均匀数据直接构造、没有逐操作审计，不模拟实际流量或退款。检查结果预约与订单各 50,000 条，号源占用差异 0。
 
-机器 CPU 为 Intel Core i9-13900HX，内存 34,033,319,936 字节；MySQL 8.4.13，InnoDB buffer pool 134,217,728 字节、flush_log_at_trx_commit=1、binlog 开启。此独立 PDO 测量连接使用服务器默认 REPEATABLE-READ；应用连接使用 READ COMMITTED，因此本次只比较只读查询计划，不推断事务竞争性能。每个查询预热一次，顺序测量七次取中位数；SQL 常量即测试参数，完整 SQL、七轮结果、结果哈希和 EXPLAIN ANALYZE 见 [p6-results-v2.json](p6-results-v2.json)。第三项为占用视图同等的按号源分组核对查询。
+单机 CPU（24 核 / 32 逻辑处理器），内存 34,033,319,936 字节；MySQL 8.4.13，InnoDB buffer pool 134,217,728 字节、flush_log_at_trx_commit=1、binlog 开启。此独立 PDO 测量连接使用服务器默认 REPEATABLE-READ；应用连接使用 READ COMMITTED，因此本次只比较只读查询计划，不推断事务竞争性能。每个查询预热一次，顺序测量七次取中位数；SQL 常量即测试参数，完整 SQL、七轮结果、结果哈希和 EXPLAIN ANALYZE 见 [p6-results-v2.json](p6-results-v2.json)。第三项为占用视图同等的按号源分组核对查询。
 
 | 查询 | 正常索引中位数 | 查询中忽略目标索引 | 结果 |
 |---|---:|---:|---|

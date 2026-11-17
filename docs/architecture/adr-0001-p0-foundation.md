@@ -2,11 +2,11 @@
 
 - 日期：2026-11-16
 - 状态：P0 实施决定；阶段验收以 PR 和实际 CI 结果为准
-- 依据：[总指令](../../CODEX_START_PROMPT.md)、[PRD V1.1](../spec/MediQueue_PRD_V1.1.md)、[数据库设计 V1.1](../spec/MediQueue_Database_Design_V1.1.md)、[模拟支付设计 V1.1](../spec/MediQueue_Mock_WeChat_Payment_Design_V1.1.md)
+- 依据：[总指令](../development/CODEX_START_PROMPT.md)、[PRD V1.1](../spec/MediQueue_PRD_V1.1.md)、[数据库设计 V1.1](../spec/MediQueue_Database_Design_V1.1.md)、[模拟支付设计 V1.1](../spec/MediQueue_Mock_WeChat_Payment_Design_V1.1.md)
 
-## 背景与授权
+## 背景
 
-用户已明确授权进入工程开发，并要求本轮仅完成 P0，验收后再进入 P1。设计文件中“尚未编码”“不是编码授权”等文字记录其编写时的状态；当前明确授权覆盖旧的阶段限制，不改变冻结业务规则。规格优先级为 PRD、数据库设计、模拟支付设计。
+P0 建立工程与数据库验证基础，再逐步实现核心模型及业务。设计文件中“尚未编码”等文字记录其编写时的状态；不改变冻结业务规则。规格优先级为 PRD、数据库设计、模拟支付设计。
 
 ## 决定
 
@@ -24,7 +24,7 @@ Cache 使用文件存储，queue 使用同步驱动。当前无需 Redis、后�
 
 唯一支付渠道为 `MOCK_WECHAT`。界面明确标注“模拟微信支付／无实际扣款”；生产模式不开放模拟付款入口。P0 不提前实现真实支付适配器、付款 API 或完整模拟付款服务。
 
-新仓库先将规格及最小开源文件推送 `main` 作为基线，再通过 `feat/p0-foundation` PR 提交工程。`main` 要求 PR 和必需 CI；阶段 PR 在实际 CI 通过后才 Ready for Review。所有 PR 等待负责人审核，不自动合并。
+工程修改通过功能分支与 PR 提交，保留质量、真实 MySQL、前端与敏感信息检查；验证和复核结果与具体提交关联。
 
 ## 影响与替代方案
 
