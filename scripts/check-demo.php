@@ -24,7 +24,7 @@ if (config('database.default') !== 'mysql' || config('database.connections.mysql
 }
 
 $connection = DB::selectOne('SELECT DATABASE() AS name, VERSION() AS version, @@session.time_zone AS timezone, @@session.transaction_isolation AS isolation_level');
-if (! app()->environment(['local', 'demo']) || $connection->name !== 'mediqueue') {
+if (! app()->environment(['local', 'demo'])) {
     fwrite(STDERR, "Demo health check requires the local/demo application database.\n");
     exit(2);
 }

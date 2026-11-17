@@ -1,25 +1,119 @@
+name: mediqueue-demo
+
+x-demo-image: &demo-image
+    build:
+        context: .
+        dockerfile: docker/app/Dockerfile
+        target: runtime
+    image: mediqueue-demo:local
+
 services:
+    bootstrap:
+        <<: *demo-image
+        user: root
+        entrypoint: [php, scripts/demo/bootstrap.php]
+        environment:
+            MEDIQUEUE_CONTAINER_DEMO: "1"
+        volumes:
+            - demo-secrets:/run/mediqueue-secrets
+            - demo-runtime:/run/mediqueue-runtime
+
     mysql:
         image: mysql:8.4
-        ports:
-            - "127.0.0.1:3307:3306"
+        depends_on:
+            bootstrap:
+                condition: service_completed_successfully
         environment:
-            MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Run php scripts/setup-local.php first}
-            MEDIQUEUE_APP_PASSWORD: ${MEDIQUEUE_APP_PASSWORD:?Missing generated app password}
-            MEDIQUEUE_MIGRATOR_PASSWORD: ${MEDIQUEUE_MIGRATOR_PASSWORD:?Missing generated migration password}
-            MEDIQUEUE_TEST_PASSWORD: ${MEDIQUEUE_TEST_PASSWORD:?Missing generated test password}
-        command:
-            - --character-set-server=utf8mb4
-            - --collation-server=utf8mb4_0900_ai_ci
+            MYSQL_ROOT_PASSWORD_FILE: /run/mediqueue-secrets/mysql-root.password
+        command: [--character-set-server=utf8mb4, --collation-server=utf8mb4_0900_ai_ci]
         volumes:
-            - mysql-data:/var/lib/mysql
-            - ./docker/mysql/init.sh:/docker-entrypoint-initdb.d/10-mediqueue.sh:ro
+            - demo-database:/var/lib/mysql
+            - demo-secrets:/run/mediqueue-secrets:ro
         healthcheck:
-            test: ["CMD-SHELL", "MYSQL_PWD=$$MYSQL_ROOT_PASSWORD mysqladmin ping -h localhost -u root --silent"]
+            test: [CMD, mysqladmin, ping, --host=127.0.0.1, --silent]
+            interval: 3s
+            timeout: 5s
+            retries: 40
+        restart: unless-stopped
+
+    setup:
+        <<: *demo-image
+        user: root
+        entrypoint: [php, scripts/demo/setup.php]
+        environment:
+            MEDIQUEUE_CONTAINER_DEMO: "1"
+            DEMO_PRINT_CREDENTIALS: ${DEMO_PRINT_CREDENTIALS:-true}
+        depends_on:
+            mysql:
+                condition: service_healthy
+        volumes:
+            - demo-secrets:/run/mediqueue-secrets
+            - demo-runtime:/run/mediqueue-runtime:ro
+
+    app:
+        <<: *demo-image
+        environment:
+            APP_ENV: demo
+        depends_on:
+            setup:
+                condition: service_completed_successfully
+        ports:
+            - "127.0.0.1:${DEMO_PORT:-8080}:8000"
+        volumes:
+            - demo-runtime:/run/mediqueue-runtime:ro
+        healthcheck:
+            test: [CMD, php, scripts/demo/health.php]
             interval: 5s
             timeout: 5s
-            retries: 30
+            retries: 20
+        restart: unless-stopped
 
+    scheduler:
+        <<: *demo-image
+        environment:
+            APP_ENV: demo
+        command: [php, artisan, schedule:work, --no-interaction]
+        depends_on:
+            setup:
+                condition: service_completed_successfully
+        volumes:
+            - demo-runtime:/run/mediqueue-runtime:ro
+        restart: unless-stopped
+
+    smoke:
+        <<: *demo-image
+        profiles: [test]
+        user: root
+        entrypoint: [php, scripts/demo/smoke.php]
+        environment:
+            APP_ENV: demo
+            MEDIQUEUE_CONTAINER_DEMO: "1"
+        depends_on:
+            app:
+                condition: service_healthy
+        volumes:
+            - demo-runtime:/run/mediqueue-runtime:ro
+            - demo-secrets:/run/mediqueue-secrets
+
+    tests:
+        build:
+            context: .
+            dockerfile: docker/app/Dockerfile
+            target: development
+        image: mediqueue-development:local
+        profiles: [test]
+        entrypoint: [php, scripts/demo/test.php]
+        environment:
+            MEDIQUEUE_CONTAINER_DEMO: "1"
+        depends_on:
+            setup:
+                condition: service_completed_successfully
+        volumes:
+            - demo-runtime:/run/mediqueue-runtime:ro
+            - demo-secrets:/run/mediqueue-secrets
+
+# New project-scoped volumes: the earlier strict-mode MySQL volume is untouched.
 volumes:
-    mysql-data:
-        name: mediqueue-mysql-data
+    demo-database:
+    demo-secrets:
+    demo-runtime:

@@ -211,8 +211,8 @@ try {
     }
     $report['status'] = 'passed';
     $report['private_backup_directory'] = '.local/backups/'.$label;
-    file_put_contents($root.'/docs/verification/p6-backup-results.json', json_encode($report, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR).PHP_EOL);
-    fwrite(STDOUT, "Backup, isolated restore, row fingerprints, associations and DML service smoke passed. See docs/verification/p6-backup-results.json.\n");
+    file_put_contents($root.'/docs/archive/verification/p6-backup-results.json', json_encode($report, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR).PHP_EOL);
+    fwrite(STDOUT, "Backup, isolated restore, row fingerprints, associations and DML service smoke passed. See docs/archive/verification/p6-backup-results.json.\n");
 } finally {
     try {
         if ($runtimeUser !== null) {

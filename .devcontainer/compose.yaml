@@ -1,0 +1,13 @@
+services:
+    app:
+        build:
+            target: development
+        image: mediqueue-development:local
+        user: root
+        environment:
+            MEDIQUEUE_TRUST_DEMO_PROXY: "true"
+        volumes:
+            - .:/var/www/html
+        command: [bash, scripts/demo/dev-start.sh]
+        healthcheck:
+            start_period: 120s

@@ -1,12 +1,12 @@
 name: 改进建议
-description: 提出具体问题与建议；冻结业务规则变更需负责人确认。
+description: 提出具体使用场景、建议与验证方式。
 title: "[Proposal] "
 body:
   - type: markdown
     attributes:
       value: |
         当前业务基线以 docs/spec 中的 V1.1 文档为准。
-        提交建议不等于批准扩展范围；请说明是否影响已冻结规则或阶段验收。
+        请说明建议是否影响现有业务规则、数据模型或兼容性。
   - type: textarea
     id: problem
     attributes:
@@ -25,6 +25,6 @@ body:
     id: scope
     attributes:
       label: 范围与替代方案
-      description: 说明是否改变冻结业务规则、涉及哪个阶段，以及更简单的替代方案。
+      description: 说明对现有业务规则的影响，以及更简单的替代方案。
     validations:
       required: true
