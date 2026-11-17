@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PatientProfileController;
 use Illuminate\Support\Facades\Route;
@@ -16,4 +17,10 @@ Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->n
 Route::middleware(['auth', 'role:PATIENT'])->group(function (): void {
     Route::get('/patient/profile', [PatientProfileController::class, 'edit'])->name('patient.profile.edit');
     Route::patch('/patient/profile', [PatientProfileController::class, 'update'])->name('patient.profile.update');
+});
+
+Route::middleware(['auth', 'active', 'role:PATIENT'])->group(function (): void {
+    Route::get('/appointments', [AppointmentController::class, 'index'])->name('appointments.index');
+    Route::post('/appointments', [AppointmentController::class, 'store'])->name('appointments.store');
+    Route::get('/appointments/{id}', [AppointmentController::class, 'show'])->whereNumber('id')->name('appointments.show');
 });

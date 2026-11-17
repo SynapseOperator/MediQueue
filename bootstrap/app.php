@@ -20,6 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
         },
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->trimStrings(except: ['request_key']);
         $middleware->alias(['role' => RequireRole::class, 'active' => EnsureActiveAccount::class]);
         $middleware->web(append: [EnsureActiveAccount::class, AuthenticateSession::class]);
         $middleware->redirectGuestsTo('/login');

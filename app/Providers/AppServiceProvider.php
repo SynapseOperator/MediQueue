@@ -27,7 +27,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // These flat HTML forms only echo strings; rejected array input is never rendered.
-        View::composer(['auth.*', 'patient.profile', 'admin.forms.*'], function (BladeView $view): void {
+        View::composer(['auth.*', 'patient.profile', 'admin.forms.*', 'hospital.doctor'], function (BladeView $view): void {
             $view->with('oldInput', array_filter(session()->getOldInput(), is_string(...)));
         });
 
