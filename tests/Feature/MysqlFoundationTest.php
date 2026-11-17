@@ -38,7 +38,8 @@ class MysqlFoundationTest extends TestCase
     {
         $this->assertTrue(Schema::hasTable('sessions'));
 
-        $this->artisan('migrate:rollback', ['--step' => 1, '--force' => true])->assertSuccessful();
+        // With later business migrations present, reset in reverse dependency order.
+        $this->artisan('migrate:reset', ['--force' => true])->assertSuccessful();
         $this->assertFalse(Schema::hasTable('sessions'));
 
         $this->artisan('migrate', ['--force' => true])->assertSuccessful();

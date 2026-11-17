@@ -4,9 +4,9 @@
 
 单医院、多科室的医院预约挂号课程项目。采用 PHP 8.4 / Laravel 13、MySQL 8.4、Blade / Tailwind CSS / Vite。
 
-当前为 **P0 基础工程，已通过阶段性代码审查，待收尾检查及负责人手动合并**：首页、数据库 session、存活/就绪检查、真实 MySQL 基础测试与 GitHub Actions。账户、十张业务表、预约、支付、退款及统计尚未实现，不能作为完整医院系统使用。[实际验证记录](docs/verification/P0.md)。
+当前为 **P1 数据库模型阶段**：P0 已合并；十张核心业务表、数据库约束、虚构基础数据和真实 MySQL 测试已加入工程。认证、预约、支付、退款及统计业务流程尚未实现，不能作为完整医院系统使用。[P1 验证记录](docs/verification/P1.md) · [ER 图与表结构说明](docs/architecture/p1-database-schema.md) · [P0 历史记录](docs/verification/P0.md)。
 
-本期支付路线仅为 **模拟微信支付／无实际扣款**，不接入真实商户，不用于真实临床服务。所有演示资料均须为合成数据。P0 未提供付款入口，模拟开关默认关闭；之后也只允许显式 local/demo/testing 环境启用。
+本期支付路线仅为 **模拟微信支付／无实际扣款**，不接入真实商户，不用于真实临床服务。所有演示资料均须为合成数据。当前未提供付款入口，模拟开关默认关闭；之后也只允许显式 local/demo/testing 环境启用。
 
 ## 快速启动
 
@@ -15,12 +15,13 @@
 ```sh
 git clone https://github.com/SynapseOperator/MediQueue.git
 cd MediQueue
-# P0 尚未合并时，先切换阶段分支
-git switch feat/p0-foundation
+# 若 P1 尚未合并，先 git switch feat/p1-core-schema
 composer install
 php scripts/setup-local.php
 docker compose --env-file .env.database up -d --wait
 php artisan migrate --env=migration --force
+# 可选：仅在十张业务表为空的本地/演示库初始化虚构基础数据
+php artisan db:seed
 npm ci
 npm run build
 php artisan serve --host=127.0.0.1 --port=8000
@@ -65,7 +66,7 @@ php artisan migrate --env=testing --force
 php artisan test --log-junit test-results/junit.xml
 ```
 
-数据库测试明确要求 MySQL 8.x 和专用 `mediqueue_test`，在测试 DDL 前核验实际数据库，不能指向业务库或用 SQLite 代替。测试创建并清理 `p0_probe_*` fixture，验证外键、CHECK、RESTRICT、精确金额/Unicode、事务回滚与运行账号无 DDL 权限；这些仅是基础能力验证，不表示 P1 业务约束或 P3 并发验收通过。
+数据库测试明确要求 MySQL 8.x 和专用 `mediqueue_test`，在测试 DDL 前核验实际数据库，不能指向业务库或用 SQLite 代替。保留 P0 基础检查，并在 P1 真实核心表上验证全部外键、唯一键、大小写敏感请求键、CHECK、容量、精确金额/毫秒时间、合法状态、迁移回滚重建及 Seeder 原子性。这不表示 P2 权限、P3 并发或 P4 生命周期验收已通过。
 
 [GitHub Actions](https://github.com/SynapseOperator/MediQueue/actions/workflows/ci.yml) 在 PR、main push、手动触发时执行四项必需检查：`quality`、`mysql`、`frontend`、`secrets`。使用锁定 SHA 的 actions；MySQL 服务隔离、凭据临时生成；Gitleaks 扫描全部 Git 历史并隐藏匹配值。JUnit 结果作为 CI artifact 保存，不上传环境文件或应用日志。
 
@@ -73,14 +74,16 @@ php artisan test --log-junit test-results/junit.xml
 
 - `app/Http/Controllers/HealthController.php`：只读数据库就绪检查。
 - `config/mediqueue.php`：医院展示时区与模拟模式边界；存储和比较使用 UTC。
-- `database/migrations/`：P0 仅 sessions；migrations 为框架技术表，两者不计十张核心业务表。
+- `database/migrations/`：users、patients、departments、doctors、schedules、slots、appointments、payment_orders、refunds、audit_logs 共十张核心表；sessions 与 migrations 是额外的框架技术表。
 - `resources/views/`：Blade 首页，使用系统字体，无外部图片或字体素材。
 - `tests/`：配置边界及真实 MySQL 基础测试；`docker/`、`scripts/` 提供环境复现。
 - `docs/spec/`：冻结规范；`docs/architecture/`：工程决定；`docs/verification/`：实际验证证据。
 
-P0 演示仅展示首页与健康检查，没有登录账号或预约数据。业务流程截图在对应阶段实现后补充；不使用效果图冒充已实现业务。
+P1 Seeder 生成 2 科室、2 医生、3 患者、1 管理员（共 6 个账户）、2 排班、4 时段；姓名和联系方式明显标注演示，独立随机密码只保存哈希，不提供公开的可登录密码。不会创建预约、订单、退款或审计。时间按上海次日 09:00–10:00 生成并转 UTC 存储。
 
-`main` 已要求 PR、四项 CI 通过与讨论解决，禁止强推和删除，管理员也受规则约束。个人项目不设置无法自行满足的他人 approval 数量；阶段审核和最终合并仍由项目负责人手动决定，自动合并关闭。
+Seeder 只允许 local/testing/demo，生产环境即使 `--force` 也拒绝。十张业务表任一非空即拒绝重跑，防止覆盖历史或重置占用；失败整体回滚。不要用清空已有业务数据的方式重复播种。认证页面和演示登录方式留在 P2；业务流程截图将在对应阶段实现后补充。
+
+`main` 已要求 PR、四项 CI 通过与讨论解决，禁止强推和删除，管理员也受规则约束。个人项目不设置无法自行满足的他人 approval 数量；负责人已授权在本地检查、独立复核和最新 CI 均通过且无遗留问题时自行合并。仓库不启用无人核验的自动合并，不绕过保护。
 
 ## 正式依据
 
@@ -89,4 +92,4 @@ P0 演示仅展示首页与健康检查，没有登录账号或预约数据。�
 - [数据库设计 V1.1](docs/spec/MediQueue_Database_Design_V1.1.md)
 - [模拟微信支付设计 V1.1](docs/spec/MediQueue_Mock_WeChat_Payment_Design_V1.1.md)
 
-遵循 [贡献指南](CONTRIBUTING.md) 与 [安全报告流程](SECURITY.md)，采用 [MIT License](LICENSE)。下一步 P1 将按冻结设计创建十张业务表及约束，须在 P0 验收后开始。老师是否接受模拟支付作为课程“在线挂号支付”仍属外部验收事项。
+遵循 [贡献指南](CONTRIBUTING.md) 与 [安全报告流程](SECURITY.md)，采用 [MIT License](LICENSE)。下一阶段为 P2 账户与医院资源；本轮不提前实现。老师是否接受模拟支付作为课程“在线挂号支付”仍属外部验收事项。

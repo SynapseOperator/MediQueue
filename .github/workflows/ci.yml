@@ -90,6 +90,8 @@ jobs:
           bash docker/mysql/init.sh
       - name: Migrate with the dedicated schema account
         run: php artisan migrate --env=migration --force
+      - name: Seed synthetic demo data with the runtime account
+        run: php artisan db:seed --force
       - name: Verify test database migration and rollback
         run: |
           php artisan migrate --env=testing --force
