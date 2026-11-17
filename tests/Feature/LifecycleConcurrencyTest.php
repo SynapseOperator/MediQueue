@@ -86,16 +86,22 @@ class LifecycleConcurrencyTest extends TestCase
         $this->saveEvidence($results, $state);
     }
 
-    public function test_payment_and_expiry_at_exact_deadline_release_once_and_never_confirm(): void
+    #[DataProvider('expiryContenders')]
+    public function test_payment_or_cancellation_and_expiry_at_exact_deadline_release_once(string $operation): void
     {
-        $this->prepareEvidence('payment-expiry-deadline');
+        $this->prepareEvidence($operation === 'pay' ? 'payment-expiry-deadline' : 'cancellation-expiry-deadline');
         CarbonImmutable::setTestNow(CarbonImmutable::parse(DB::table('appointments')->sole()->expires_at, 'UTC'));
-        $results = $this->raceTogether([['operation' => 'pay'], ['operation' => 'expire', 'user_id' => null]]);
+        $results = $this->raceTogether([['operation' => $operation], ['operation' => 'expire', 'user_id' => null]]);
         $this->assertSame('EXPIRED', $results[0]['result']);
         $this->assertIsBool($results[1]['result']);
         $this->assertAudits(['APPOINTMENT_CREATED' => 1, 'APPOINTMENT_EXPIRED' => 1]);
         $state = $this->assertLedger('EXPIRED', 'CLOSED');
         $this->saveEvidence($results, $state);
+    }
+
+    public static function expiryContenders(): array
+    {
+        return [['pay'], ['cancel']];
     }
 
     public function test_timer_and_on_demand_reclamation_share_one_transition_even_for_disabled_patient(): void

@@ -75,7 +75,7 @@ php artisan migrate --env=testing --force
 php artisan test --log-junit test-results/junit.xml
 ```
 
-数据库测试明确要求 MySQL 8.x 和专用 `mediqueue_test`，在测试 DDL 前核验实际数据库，不能指向业务库或用 SQLite 代替。保留 P0–P3 全部有效检查；P4 新增支付/取消/回收/退款竞态、时间边界、权限、故障回滚和提交响应未知恢复验证。运行时应独占测试库，不同时启动两套 PHPUnit。单独运行并发：`php artisan test --filter=ConcurrencyTest`。P3 四份 `test-results/appointment-concurrency-*.json` 与 P4 八份 `test-results/lifecycle-concurrency-*.json` 含实际 PID、MySQL 连接 ID、结果、状态和占用核对；不把顺序 HTTP 请求当并发测试。
+数据库测试明确要求 MySQL 8.x 和专用 `mediqueue_test`，在测试 DDL 前核验实际数据库，不能指向业务库或用 SQLite 代替。保留 P0–P3 全部有效检查；P4 新增支付/取消/回收/退款竞态、时间边界、权限、故障回滚和提交响应未知恢复验证。运行时应独占测试库，不同时启动两套 PHPUnit。单独运行并发：`php artisan test --filter=ConcurrencyTest`。P3 四份 `test-results/appointment-concurrency-*.json` 与 P4 九份 `test-results/lifecycle-concurrency-*.json` 含实际 PID、MySQL 连接 ID、结果、状态和占用核对；不把顺序 HTTP 请求当并发测试。
 
 [GitHub Actions](https://github.com/SynapseOperator/MediQueue/actions/workflows/ci.yml) 在 PR、main push、手动触发时执行四项必需检查：`quality`、`mysql`、`frontend`、`secrets`。使用锁定 SHA 的 actions；MySQL 服务隔离、凭据临时生成；Gitleaks 扫描全部 Git 历史并隐藏匹配值。JUnit 与 P3/P4 并发 JSON 随 `mysql-junit` artifact 保存，不上传环境文件或应用日志。
 
