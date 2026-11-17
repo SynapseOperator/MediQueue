@@ -5,6 +5,10 @@ if (getenv('MEDIQUEUE_CONTAINER_DEMO') !== '1' || ! is_file('/.dockerenv')) {
     fwrite(STDERR, "Tests require the isolated Compose demo.\n");
     exit(2);
 }
+$root = dirname(__DIR__, 2);
+// Laravel's test bootstrap still opens its env file even with explicit process variables.
+// This container-only marker holds no credentials; all connection values are pinned below.
+file_put_contents($root.'/.env.testing', "# Isolated container test environment; configuration is supplied by the CLI runner.\n");
 $credentials = json_decode(file_get_contents('/run/mediqueue-secrets/database.json'), true, flags: JSON_THROW_ON_ERROR);
 $testPassword = bin2hex(random_bytes(24));
 $pdo = new PDO('mysql:host=mysql;port=3306;charset=utf8mb4', 'root', $credentials['root'], [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
@@ -20,5 +24,5 @@ $environment = array_merge(getenv(), [
     'DB_URL' => '', 'DB_SOCKET' => '', 'MEDIQUEUE_SCHEMA_RUNNER' => '1',
     'DB_ROUTINE_ADMIN_PASSWORD' => $credentials['root'],
 ]);
-$process = proc_open([PHP_BINARY, 'artisan', 'test', ...array_slice($argv, 1)], [STDIN, STDOUT, STDERR], $pipes, dirname(__DIR__, 2), $environment);
+$process = proc_open([PHP_BINARY, 'artisan', 'test', ...array_slice($argv, 1)], [STDIN, STDOUT, STDERR], $pipes, $root, $environment);
 exit(proc_close($process));
