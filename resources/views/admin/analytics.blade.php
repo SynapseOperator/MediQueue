@@ -23,10 +23,23 @@
             ['模拟净额', '¥'.$summary->simulated_net, '本期模拟付款减本期成功退款；可能为负'],
         ];
     @endphp
-    <section class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3" aria-label="九项统计指标">
-        @foreach($cards as [$label, $value, $meaning])
-            <article class="panel"><h2 class="text-sm font-medium text-slate-600">{{ $label }}</h2><p class="mt-2 text-3xl font-semibold">{{ $value }}</p><p class="mt-3 text-sm text-slate-500">{{ $meaning }}</p></article>
-        @endforeach
+    <section class="mt-8" aria-label="九项统计指标">
+        <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <h2 class="section-title">关键运营指标</h2>
+            <p class="text-xs text-slate-500">按所选日期范围计算 · 坚持区分预约、就诊与模拟账务</p>
+        </div>
+        <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            @foreach($cards as [$label, $value, $meaning])
+                <article class="metric-card {{ $loop->first ? 'metric-card--lead' : '' }} {{ $loop->index >= 6 ? 'metric-card--finance' : '' }} {{ $loop->index > 2 ? 'metric-card--compact' : '' }}">
+                    <div class="flex items-center justify-between gap-3">
+                        <h3 class="metric-label">{{ $label }}</h3>
+                        <span class="metric-index" aria-hidden="true">{{ str_pad((string) ($loop->iteration), 2, '0', STR_PAD_LEFT) }}</span>
+                    </div>
+                    <p class="metric-number">{{ $value }}</p>
+                    <p class="metric-note">{{ $meaning }}</p>
+                </article>
+            @endforeach
+        </div>
     </section>
     <p class="mt-4 text-sm text-slate-600">所选就诊日期容量 {{ $summary->capacity }}，存储占用 {{ $summary->occupied_count }}；单 SQL 账实差异号源 {{ $summary->occupancy_mismatches }} 个。{{ $summary->occupancy_mismatches ? '存在差异，请调查；本页面不会修正计数。' : '当前核对一致。' }} 分母为零的比率显示“—”。</p>
     <section class="mt-8 grid gap-5 lg:grid-cols-3" aria-label="待处理事项">
