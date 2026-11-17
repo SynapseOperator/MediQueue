@@ -1,10 +1,13 @@
 <?php
 
 use App\Http\Controllers\HealthController;
+use App\Http\Middleware\EnsureActiveAccount;
+use App\Http\Middleware\RequireRole;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
+use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Support\Facades\Route;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -17,7 +20,10 @@ return Application::configure(basePath: dirname(__DIR__))
         },
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        $middleware->alias(['role' => RequireRole::class, 'active' => EnsureActiveAccount::class]);
+        $middleware->web(append: [EnsureActiveAccount::class, AuthenticateSession::class]);
+        $middleware->redirectGuestsTo('/login');
+        $middleware->redirectUsersTo('/');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

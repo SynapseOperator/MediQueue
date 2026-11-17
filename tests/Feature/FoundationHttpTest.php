@@ -16,7 +16,7 @@ class FoundationHttpTest extends TestCase
         $this->get('/')
             ->assertOk()
             ->assertSee('MediQueue')
-            ->assertSee('P1')
+            ->assertSee('P2')
             ->assertSee('模拟微信支付')
             ->assertSee('无实际扣款');
     }
