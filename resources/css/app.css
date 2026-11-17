@@ -125,6 +125,10 @@
     .field input[readonly] { @apply bg-slate-100 text-slate-500; }
     .hint { @apply text-xs font-normal leading-5 text-slate-500; }
     .status-badge { @apply inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-bold; color: #116f7a; background: #e7f6f4; }
+    .status-badge--success { color: #166c51; background: #e5f6ed; }
+    .status-badge--warning { color: #956014; background: #fff3d9; }
+    .status-badge--danger { color: #9a4040; background: #ffeded; }
+    .status-badge--neutral { color: #596c80; background: #eef2f6; }
     .table-wrap { @apply overflow-x-auto rounded-[1.25rem] border bg-white; border-color: var(--line); }
     .table-wrap table { @apply w-full text-left text-sm; }
     .table-wrap th { @apply whitespace-nowrap px-4 py-3.5 text-xs font-bold; color: #567083; background: #f0f7fa; }
