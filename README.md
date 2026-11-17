@@ -4,7 +4,9 @@
 
 单医院、多科室的医院预约挂号课程项目。采用 PHP 8.4 / Laravel 13、MySQL 8.4、Blade / Tailwind CSS / Vite。
 
-当前为 **P4 模拟支付与预约生命周期阶段**：保留认证、资源管理和预约事务，实现模拟付款、取消、定时及按需到期回收、模拟退款与管理员逐条登记完成。状态、名额和审计同事务提交，支付确认不重复占号，取消与回收只释放一次。尚未完成 P5 最终展示与综合验收，不用于真实医院服务。[P4 验证记录](docs/verification/P4.md) · [生命周期设计](docs/architecture/adr-0005-p4-lifecycle.md) · [P3 历史记录](docs/verification/P3.md) · [ER 图与表结构](docs/architecture/p1-database-schema.md)。
+当前为 **P5 页面、统计与课程 SQL 阶段**：完成患者预约确认、模拟收银台、医生只读名单、管理员看板和审计，以及基于真实 MySQL 的统计对象。P6 综合验收与课程报告尚待完成，不用于真实医院服务。[浏览器验收与截图](docs/verification/p5-browser.md) · [统计口径与设计](docs/architecture/p5-analytics.md) · [SQL 与权限说明](docs/database/p5-sql.md) · [P4 验证记录](docs/verification/P4.md)。
+
+本地全量测试最近一次为 **229 项、2871 断言、0 失败**；远端提交、CI 及合并结果见阶段 PR 的交付记录和实际 GitHub Actions 检查。
 
 本期支付路线仅为 **模拟微信支付／无实际扣款**，不接入真实商户。所有演示资料均须为合成数据。模拟开关默认关闭，仅允许显式 local/demo/testing 环境启用，production 即使开关打开也拒绝模拟付款及退款。
 
@@ -18,7 +20,8 @@ cd MediQueue
 composer install
 php scripts/setup-local.php
 docker compose --env-file .env.database up -d --wait
-php artisan migrate --env=migration --force
+php scripts/run-schema.php migrate
+php scripts/run-schema.php grant
 # 可选：仅在十张业务表为空的本地/演示库初始化虚构基础数据
 php artisan db:seed
 npm ci
@@ -32,12 +35,14 @@ php artisan serve --host=127.0.0.1 --port=8000
 
 | 文件 / 账号 | 用途与权限 |
 |---|---|
-| `.env` / mediqueue_app | HTTP 运行，仅 mediqueue 库 SELECT、INSERT、UPDATE、DELETE |
-| `.env.migration` / mediqueue_migrator | 显式迁移命令，具有 mediqueue 库结构管理权限 |
+| `.env` / mediqueue_app | HTTP 运行：mediqueue 库 SELECT、INSERT、UPDATE、DELETE，以及仅对 `sp_department_statistics` 和 `fn_intervals_overlap` 的 EXECUTE |
+| `.env.migration` / mediqueue_migrator | 显式迁移使用 mediqueue 库结构管理权限；报告函数安装另由短期 CLI DBA 凭据完成 |
 | `.env.testing` / mediqueue_test | 专用 mediqueue_test 库，可创建/删除测试结构；另含运行账号用于权限检查 |
-| `.env.database` / root | 仅本机 Docker 初始化和账号授权，不供 HTTP 应用加载 |
+| `.env.database` / root | 仅初始化、短期 schema runner 和对象级授权，不供 HTTP 应用加载 |
 
-MySQL 仅绑定 `127.0.0.1:3307`。数据持久化到 Docker 卷；`docker compose --env-file .env.database stop` 停服务并保留数据。初始化脚本只在空数据目录运行，修改环境文件不会自动更改已有数据库密码。不要删除持久卷来处理普通连接问题。
+`run-schema.php` 从本地 `.env.database` 为短生命周期 CLI 进程提供 DBA 凭据，以创建 MySQL binlog 环境下所需的函数；HTTP 常驻进程不获取该凭据。`grant` 只授予上述两个报告例程的 EXECUTE，不关闭 binlog 信任边界。迁移或测试前若有配置缓存，先运行 `php artisan config:clear`。已有 MySQL 用户也需配置匹配的 `.env.database`，并按 [SQL 说明](docs/database/p5-sql.md) 使用授权的数据库管理员。
+
+Compose MySQL 仅绑定 `127.0.0.1:3307`。数据持久化到 Docker 卷；`docker compose --env-file .env.database stop` 停服务并保留数据。初始化脚本只在空数据目录运行，修改环境文件不会自动更改已有数据库密码。不要删除持久卷来处理普通连接问题。
 
 本机已配置的 Windows 环境：项目在 `D:\Bread_coding\MediQueue`，PHP 在 `D:\Bread_coding\.tools\mediqueue\php\php.exe`，Composer 在 `D:\Bread_coding\.tools\mediqueue\composer.phar`。当前终端可使用：
 
@@ -71,11 +76,11 @@ composer audit
 npm ci
 npm audit --audit-level=low
 npm run build
-php artisan migrate --env=testing --force
-php artisan test --log-junit test-results/junit.xml
+php scripts/run-schema.php testing
+php scripts/run-schema.php test --log-junit test-results/junit.xml
 ```
 
-数据库测试明确要求 MySQL 8.x 和专用 `mediqueue_test`，在测试 DDL 前核验实际数据库，不能指向业务库或用 SQLite 代替。保留 P0–P3 全部有效检查；P4 新增支付/取消/回收/退款竞态、时间边界、权限、故障回滚和提交响应未知恢复验证。运行时应独占测试库，不同时启动两套 PHPUnit。单独运行并发：`php artisan test --filter=ConcurrencyTest`。P3 四份 `test-results/appointment-concurrency-*.json` 与 P4 九份 `test-results/lifecycle-concurrency-*.json` 含实际 PID、MySQL 连接 ID、结果、状态和占用核对；不把顺序 HTTP 请求当并发测试。
+数据库测试明确要求 MySQL 8.x 和专用 `mediqueue_test`，在测试 DDL 前核验实际数据库，不能指向业务库或用 SQLite 代替。保留 P0–P4 全部有效检查；P4 新增支付/取消/回收/退款竞态、时间边界、权限、故障回滚和提交响应未知恢复验证。运行时应独占测试库，不同时启动两套 PHPUnit。单独运行并发：`php scripts/run-schema.php test --filter=ConcurrencyTest`。P3 四份 `test-results/appointment-concurrency-*.json` 与 P4 九份 `test-results/lifecycle-concurrency-*.json` 含实际 PID、MySQL 连接 ID、结果、状态和占用核对；不把顺序 HTTP 请求当并发测试。
 
 [GitHub Actions](https://github.com/SynapseOperator/MediQueue/actions/workflows/ci.yml) 在 PR、main push、手动触发时执行四项必需检查：`quality`、`mysql`、`frontend`、`secrets`。使用锁定 SHA 的 actions；MySQL 服务隔离、凭据临时生成；Gitleaks 扫描全部 Git 历史并隐藏匹配值。JUnit 与 P3/P4 并发 JSON 随 `mysql-junit` artifact 保存，不上传环境文件或应用日志。
 
@@ -88,7 +93,8 @@ php artisan test --log-junit test-results/junit.xml
 - `app/Http/Controllers/AdminResourceController.php`：受锁保护的医院资源管理与同事务审计。
 - `app/Services/AppointmentService.php`：患者锁、资源资格保护、条件占号、预约/订单/审计事务及原请求标识恢复。
 - `app/Services/AppointmentLifecycleService.php`：按同一锁顺序处理支付确认、取消、回收、退款和人工完成；`app/Payments/` 是唯一启用的本地模拟网关。
-- `resources/views/`：统一布局的认证、患者、目录、医生工作台和管理页面，使用系统字体，无外部素材。
+- `resources/views/`：响应式认证、患者、医生和管理页面，包括预约确认、模拟收银台及统计视图，使用系统字体，无外部素材。
+- `docs/database/p5-sql.md`：统计视图、存储过程、函数和权限路径。
 - `tests/`：配置边界及真实 MySQL 基础测试；`docker/`、`scripts/` 提供环境复现。
 - `docs/spec/`：冻结规范；`docs/architecture/`：工程决定；`docs/verification/`：实际验证证据。
 
@@ -114,20 +120,21 @@ php artisan mediqueue:demo-password demo_patient_1
 |---|---|
 | `/register`、`/login` | 未登录访客注册患者或登录现有账号 |
 | `/patient/profile` | 患者仅维护本人姓名与联系方式 |
-| `POST /appointments`、`GET /appointments`、`GET /appointments/{id}` | 仅患者；从当前登录账号确定患者，创建预约及查看本人列表/详情 |
-| `POST /appointments/{id}/pay`、`POST /appointments/{id}/cancel` | 本人预约模拟付款（短期签名链接）或开始前取消；均要求 Session、角色与 CSRF |
+| `GET /appointments/confirm`、`POST /appointments`、`GET /appointments`、`GET /appointments/{id}` | 仅患者；从当前登录账号确定患者，创建预约及查看本人列表/详情 |
+| `GET /appointments/{id}/payment`、`POST /appointments/{id}/pay`、`POST /appointments/{id}/cancel` | 本人预约模拟付款（短期签名链接）或开始前取消；均要求 Session、角色与 CSRF |
 | `/departments`、`/doctors` | 公开科室、医生及未来 7 个自然日的开放时段；窗口可在 config/mediqueue.php 调整 |
 | `/doctor/workbench` | 医生仅查看本人排班，不能编辑或进入他人排班详情 |
+| `/admin`、`/admin/analytics`、`/admin/audit` | 管理员看板、科室与日期统计、只读审计；金额均为模拟 |
 | `/admin/resources` | 管理员创建/编辑/启停科室和医生，配置草稿排班/号源后发布、停诊或关闭 |
 | `/admin/appointments`、`/admin/appointments/{id}` | 管理员逐条查看、核实异常取消、处理模拟退款、登记已就诊完成 |
 
 排班与号源输入、显示均为北京时间，写入 UTC。相邻时段允许，重叠拒绝；已有预约的时间/关联冻结，时段开始后容量冻结，费用修改不更新已有预约金额。基础资源通过停用、关闭保留历史，无物理删除入口。医生资源的 `doctors.status` 和登录账号的 `users.status` 分别控制资源与账户；停用医生资源不会自动禁用其历史工作台，停用账号则拒绝新登录和旧会话。
 
-患者在医生详情页点击预约，随后查看待支付订单；支付截止为锁内创建时间加 15 分钟与就诊开始的较早者。请求只接受 `slot_id` 和 `request_key`（另含 CSRF token）；标识为 16–64 位 ASCII 字母、数字、下划线或连字符，保留大小写、不裁剪。相同标识必须使用相同号源，重复返回原记录；网络结果未知时先查看“我的预约”或用原标识重试，不换新标识占号。
+患者在医生详情选择时段，核对确认页后查看待支付订单；支付截止为锁内创建时间加 15 分钟与就诊开始的较早者。请求只接受 `slot_id` 和 `request_key`（另含 CSRF token）；标识为 16–64 位 ASCII 字母、数字、下划线或连字符，保留大小写、不裁剪。相同标识必须使用相同号源，重复返回原记录；网络结果未知时先查看“我的预约”或用原标识重试，不换新标识占号。
 
 ## 模拟支付与生命周期演示
 
-在私有 `.env` 中设置 `APP_ENV=local`（或 demo）、`MOCK_PAYMENTS_ENABLED=true` 后清除配置缓存，才能在本人待支付详情页看到模拟付款按钮。不要将 `.env` 提交。付款可选择成功、拒绝或结果未知；页面重新查询持久化状态，结果未知不等于已支付。付款链接五分钟有效，同时仍受订单的实际截止限制。没有微信商户配置、真实二维码或外部资金调用。
+在私有 `.env` 中设置 `APP_ENV=local`（或 demo）、`MOCK_PAYMENTS_ENABLED=true` 后清除配置缓存，才能从本人待支付详情进入独立模拟收银台。不要将 `.env` 提交。付款可选择成功、拒绝或结果未知；页面重新查询持久化状态，结果未知不等于已支付。付款链接五分钟有效，同时仍受订单的实际截止限制。没有微信商户配置、真实二维码或外部资金调用。
 
 患者仅可在就诊开始前取消。待支付取消关闭订单；已付款取消在一个事务中释放名额、创建唯一全额退款并标为待处理。管理员进入预约详情后可模拟退款成功、失败或未知；失败/未知保留原退款记录重试，预约保持已取消，不重新占号。退款尚未处理时明确显示待退款，不能当作成功到账。管理员异常取消需逐条核实未就诊并填原因；已付款且就诊已开始的预约才能登记完成，完成保留占用，不可取消。
 
@@ -152,4 +159,4 @@ php artisan mediqueue:expire-appointments --limit=100
 - [数据库设计 V1.1](docs/spec/MediQueue_Database_Design_V1.1.md)
 - [模拟微信支付设计 V1.1](docs/spec/MediQueue_Mock_WeChat_Payment_Design_V1.1.md)
 
-遵循 [贡献指南](CONTRIBUTING.md) 与 [安全报告流程](SECURITY.md)，采用 [MIT License](LICENSE)。下一阶段 P5 完善页面、统计视图及课程要求的复杂 SQL/存储过程与函数；P6 再完成综合验收及报告。本轮未提前实现统计大屏或真实支付。老师是否接受模拟支付作为课程“在线挂号支付”仍属外部验收事项。
+遵循 [贡献指南](CONTRIBUTING.md) 与 [安全报告流程](SECURITY.md)，采用 [MIT License](LICENSE)。下一阶段 P6 完成综合验收、备份恢复及课程报告；真实支付不在本项目范围。老师是否接受模拟支付作为课程“在线挂号支付”仍属外部验收事项。

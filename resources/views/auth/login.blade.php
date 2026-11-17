@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('title', '登录')
 @section('content')
-    <section class="panel mx-auto max-w-md">
+    <section class="panel mx-auto max-w-md border-t-4 border-t-teal-700">
         <p class="eyebrow">欢迎回来</p><h1 class="page-title mt-2">登录 MediQueue</h1>
         <p class="mt-3 text-sm text-slate-600">患者、医生和管理员使用各自账号登录。</p>
         <form method="POST" action="{{ route('login.store') }}" class="mt-7 space-y-5">

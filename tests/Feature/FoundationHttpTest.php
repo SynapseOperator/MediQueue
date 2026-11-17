@@ -9,14 +9,14 @@ use Tests\TestCase;
 
 class FoundationHttpTest extends TestCase
 {
-    public function test_home_page_identifies_the_current_phase_and_mock_payment_boundary(): void
+    public function test_home_page_identifies_the_patient_flow_and_mock_payment_boundary(): void
     {
         $this->withoutVite();
 
         $this->get('/')
             ->assertOk()
             ->assertSee('MediQueue')
-            ->assertSee('P4')
+            ->assertSee('选择医生与时段')
             ->assertSee('模拟微信支付')
             ->assertSee('无实际扣款');
     }

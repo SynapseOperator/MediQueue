@@ -58,7 +58,7 @@ class CoreSchemaTest extends TestCase
 
     public function test_core_tables_have_unsigned_keys_nonnull_millisecond_dates_and_innodb(): void
     {
-        $tables = DB::table('information_schema.TABLES')
+        $tables = DB::table('information_schema.TABLES')->where('TABLE_TYPE', 'BASE TABLE')
             ->where('TABLE_SCHEMA', 'mediqueue_test')->pluck('ENGINE', 'TABLE_NAME')->all();
         $this->assertEqualsCanonicalizing([...self::TABLES, 'sessions', 'migrations'], array_keys($tables));
 

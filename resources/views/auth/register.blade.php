@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('title', '患者注册')
 @section('content')
-    <section class="panel mx-auto max-w-lg">
+    <section class="panel mx-auto max-w-lg border-t-4 border-t-teal-700">
         <p class="eyebrow">患者账户</p><h1 class="page-title mt-2">创建演示档案</h1>
         <p class="mt-3 text-sm leading-6 text-slate-600">请仅填写虚构资料。该入口只创建患者账号；医生和管理员由受控管理流程建立。</p>
         <form method="POST" action="{{ route('register.store') }}" class="mt-7 space-y-5">

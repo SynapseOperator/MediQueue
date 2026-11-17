@@ -22,7 +22,9 @@ Route::middleware(['auth', 'role:PATIENT'])->group(function (): void {
 
 Route::middleware(['auth', 'active', 'role:PATIENT'])->group(function (): void {
     Route::get('/appointments', [AppointmentController::class, 'index'])->name('appointments.index');
+    Route::get('/appointments/confirm', [AppointmentController::class, 'confirm'])->name('appointments.confirm');
     Route::post('/appointments', [AppointmentController::class, 'store'])->name('appointments.store');
+    Route::get('/appointments/{id}/payment', [AppointmentController::class, 'show'])->whereNumber('id')->name('appointments.checkout');
     Route::post('/appointments/{id}/pay', [LifecycleController::class, 'pay'])->whereNumber('id')->middleware('signed')->name('appointments.pay');
     Route::post('/appointments/{id}/cancel', [LifecycleController::class, 'patientCancel'])->whereNumber('id')->name('appointments.cancel');
     Route::get('/appointments/{id}', [AppointmentController::class, 'show'])->whereNumber('id')->name('appointments.show');

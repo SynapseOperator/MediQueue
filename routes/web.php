@@ -4,9 +4,7 @@ use App\Http\Controllers\DoctorWorkbenchController;
 use App\Http\Controllers\HospitalDirectoryController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-})->name('home');
+Route::get('/', [HospitalDirectoryController::class, 'home'])->name('home');
 
 Route::get('/departments', [HospitalDirectoryController::class, 'departments'])->name('departments.index');
 Route::get('/doctors', [HospitalDirectoryController::class, 'doctors'])->name('doctors.index');

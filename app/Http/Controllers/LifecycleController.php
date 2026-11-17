@@ -35,14 +35,28 @@ class LifecycleController extends Controller
         return redirect()->route('appointments.show', $id)->with('status', '已提交取消；如有退款，请查看退款状态。');
     }
 
-    public function adminIndex(): View
+    public function adminIndex(Request $request): View
     {
+        $input = $request->validate([
+            'status' => ['nullable', 'in:PENDING_PAYMENT,CONFIRMED,COMPLETED,CANCELLED,EXPIRED'],
+            'department' => ['nullable', 'integer', 'min:1'], 'attention' => ['nullable', 'in:refund,suspended,unverified'],
+        ]);
         $appointments = DB::table('appointments')->join('payment_orders', 'payment_orders.appointment_id', '=', 'appointments.id')
             ->leftJoin('refunds', 'refunds.payment_order_id', '=', 'payment_orders.id')
-            ->select('appointments.id', 'appointments.appointment_no', 'appointments.status', 'payment_orders.status as order_status', 'refunds.status as refund_status')
-            ->orderByDesc('appointments.id')->paginate(20);
+            ->join('patients', 'patients.id', '=', 'appointments.patient_id')->join('slots', 'slots.id', '=', 'appointments.slot_id')
+            ->join('schedules', 'schedules.id', '=', 'slots.schedule_id')->join('doctors', 'doctors.id', '=', 'schedules.doctor_id')
+            ->join('departments', 'departments.id', '=', 'schedules.department_id')
+            ->when($input['status'] ?? null, fn ($query, $status) => $query->where('appointments.status', $status))
+            ->when($input['department'] ?? null, fn ($query, $id) => $query->where('schedules.department_id', $id))
+            ->when(($input['attention'] ?? null) === 'refund', fn ($query) => $query->whereIn('refunds.status', ['PENDING', 'FAILED']))
+            ->when(($input['attention'] ?? null) === 'suspended', fn ($query) => $query->where('schedules.status', 'SUSPENDED')->whereIn('appointments.status', ['PENDING_PAYMENT', 'CONFIRMED']))
+            ->when(($input['attention'] ?? null) === 'unverified', fn ($query) => $query->where('appointments.status', 'CONFIRMED')->where('slots.ends_at', '<=', now('UTC')->format('Y-m-d H:i:s.v')))
+            ->select('appointments.id', 'appointments.appointment_no', 'appointments.status', 'payment_orders.status as order_status', 'refunds.status as refund_status',
+                'patients.full_name as patient_name', 'doctors.full_name as doctor_name', 'departments.name as department_name', 'slots.starts_at', 'appointments.fee_amount')
+            ->orderByDesc('appointments.id')->paginate(20)->withQueryString();
+        $departments = DB::table('departments')->orderBy('name')->get(['id', 'name']);
 
-        return view('admin.appointments', compact('appointments'));
+        return view('admin.appointments', compact('appointments', 'departments'));
     }
 
     public function adminShow(int $id): View

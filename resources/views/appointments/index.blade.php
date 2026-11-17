@@ -1,12 +1,9 @@
 @extends('layouts.app')
 @section('title', '我的预约')
 @section('content')
-    <h1 class="page-title">我的预约</h1>
-    <p class="mt-3 text-slate-600">提交结果不确定时，可在这里查看本人预约。</p>
-    <div class="mt-6 space-y-3">
-        @forelse($appointments as $appointment)
-            <div class="panel"><a class="text-link" href="{{ route('appointments.show', $appointment->id) }}">{{ $appointment->appointment_no }}</a><p class="mt-2">{{ $appointment->status }}</p></div>
-        @empty<p>暂无预约。</p>@endforelse
-    </div>
-    <div class="mt-6">{{ $appointments->links() }}</div>
+    <p class="eyebrow">患者中心</p><h1 class="page-title mt-2">我的预约</h1><p class="page-intro">查看本人预约、订单与模拟退款进度。提交结果不确定时，可先在这里查回。</p>
+    <form class="surface-muted mt-6 flex flex-wrap items-end gap-3" method="GET" action="{{ route('appointments.index') }}"><label class="field">预约状态<select name="status"><option value="">全部状态</option>@foreach(['PENDING_PAYMENT'=>'待支付','CONFIRMED'=>'已确认','CANCELLED'=>'已取消','EXPIRED'=>'已过期','COMPLETED'=>'已完成'] as $value => $label)<option value="{{ $value }}" @selected(request('status') === $value)>{{ $label }}</option>@endforeach</select></label><button class="btn" type="submit">筛选</button><a class="text-link py-3" href="{{ route('appointments.index') }}">清除</a></form>
+    <div class="mt-6 space-y-4">@forelse($appointments as $appointment)
+        <article class="panel"><div class="flex flex-wrap items-start justify-between gap-4"><div><p class="eyebrow">{{ $appointment->department_name }}</p><h2 class="mt-2 text-lg font-bold">{{ $appointment->doctor_name }}</h2><p class="mt-2 text-sm text-slate-600">{{ \Carbon\CarbonImmutable::parse($appointment->starts_at, 'UTC')->setTimezone(config('mediqueue.hospital_timezone'))->format('Y-m-d H:i') }}–{{ \Carbon\CarbonImmutable::parse($appointment->ends_at, 'UTC')->setTimezone(config('mediqueue.hospital_timezone'))->format('H:i') }} · 北京时间</p></div><div class="flex flex-wrap gap-2"><x-resource-status :value="$appointment->status" /><x-resource-status :value="$appointment->order_status" />@if($appointment->refund_status)<x-resource-status :value="$appointment->refund_status" />@endif</div></div><div class="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4"><span class="break-all text-xs text-slate-500">{{ $appointment->appointment_no }}</span><a class="text-link" href="{{ route('appointments.show', $appointment->id) }}">查看详情 →</a></div></article>
+    @empty<div class="panel text-center"><h2 class="font-bold">暂无符合条件的预约</h2><p class="mt-2 text-sm text-slate-500">试试其他状态，或浏览医生选择时段。</p><a class="btn-secondary mt-5" href="{{ route('doctors.index') }}">查找医生</a></div>@endforelse</div><div class="mt-6">{{ $appointments->links() }}</div>
 @endsection

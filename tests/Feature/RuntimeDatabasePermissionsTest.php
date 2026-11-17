@@ -24,6 +24,12 @@ class RuntimeDatabasePermissionsTest extends TestCase
         $runtime = DB::connection('runtime_probe');
         $this->assertSame('mediqueue', $runtime->selectOne('SELECT DATABASE() AS name')->name);
         $this->assertIsArray($runtime->select('SELECT id FROM sessions LIMIT 1'));
+        $this->assertIsArray($runtime->select('SELECT appointment_id FROM v_appointment_details LIMIT 1'));
+        $this->assertIsArray($runtime->select('SELECT slot_id FROM v_slot_occupancy_check LIMIT 1'));
+        $this->assertSame(0, (int) $runtime->selectOne(
+            "SELECT fn_intervals_overlap('2026-01-01 00:00:00', '2026-01-01 01:00:00', '2026-01-01 01:00:00', '2026-01-01 02:00:00') AS overlaps"
+        )->overlaps);
+        $this->assertIsArray($runtime->select("CALL sp_department_statistics('2000-01-01', '2000-01-01')"));
 
         try {
             // The existing table makes this probe non-mutating even if CREATE was accidentally granted.

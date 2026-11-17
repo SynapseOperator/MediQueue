@@ -10,6 +10,14 @@ use Illuminate\View\View;
 
 class HospitalDirectoryController extends Controller
 {
+    public function home(): View
+    {
+        return view('welcome', [
+            'departments' => DB::table('departments')->where('status', 'ACTIVE')->orderBy('id')->limit(6)->get(),
+            'doctorCount' => $this->publicDoctors()->count(),
+        ]);
+    }
+
     public function departments(): View
     {
         return view('hospital.departments', [
