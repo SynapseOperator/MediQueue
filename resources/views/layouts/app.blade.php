@@ -21,6 +21,7 @@
                     <a class="nav-link" href="{{ route('doctor.workbench') }}">医生工作台</a>
                 @elseif(auth()->user()->role === 'ADMIN')
                     <a class="nav-link" href="{{ route('admin.resources') }}">资源管理</a>
+                    <a class="nav-link" href="{{ route('admin.appointments.index') }}">预约处理</a>
                 @endif
                 <span class="text-sm text-slate-500">{{ auth()->user()->username }}</span>
                 <form method="POST" action="{{ route('logout') }}">@csrf<button class="nav-link" type="submit">退出</button></form>
@@ -42,7 +43,7 @@
     </main>
     <footer class="mx-auto max-w-6xl border-t border-slate-200 px-5 py-6 text-sm leading-6 text-slate-500">
         <p>课程演示 · 仅使用虚构资料，不用于真实临床服务。</p>
-        <p>模拟微信支付 · 无实际扣款。当前 P3 阶段尚未开放付款或退款。所有出诊时间按北京时间（Asia/Shanghai）显示。</p>
+        <p>模拟微信支付 · 无实际扣款。模拟付款与退款仅用于演示。所有出诊时间按北京时间（Asia/Shanghai）显示。</p>
     </footer>
 </body>
 </html>

@@ -4,7 +4,7 @@
     <a class="text-link" href="{{ route('doctors.index') }}">← 返回医生列表</a>
     <section class="panel mt-6"><p class="eyebrow">{{ $doctor->department_name }}</p><h1 class="page-title mt-2">{{ $doctor->full_name }} <span class="text-lg font-normal text-slate-500">{{ $doctor->title }}</span></h1><p class="mt-4 font-medium">擅长：{{ $doctor->specialty ?: '暂未填写' }}</p><p class="mt-4 whitespace-pre-line leading-7 text-slate-600">{{ $doctor->introduction ?: '医生暂未提供详细介绍。' }}</p></section>
     <section class="mt-9">
-        <h2 class="text-2xl font-semibold">未来出诊时段</h2><p class="mt-3 text-slate-600">仅显示未来 {{ config('mediqueue.availability_days') }} 个自然日内开放且尚未开始的时段。患者可提交预约；付款将在下一阶段开放。</p>
+        <h2 class="text-2xl font-semibold">未来出诊时段</h2><p class="mt-3 text-slate-600">仅显示未来 {{ config('mediqueue.availability_days') }} 个自然日内开放且尚未开始的时段。患者可提交预约，并在演示环境体验模拟微信支付（无实际扣款）。</p>
         <form method="GET" class="mt-5 flex flex-wrap items-end gap-3">
             <label class="field">日期<input type="date" name="date" value="{{ request('date') }}" min="{{ $today->toDateString() }}" max="{{ $lastDay->toDateString() }}"></label><button class="btn" type="submit">筛选</button><a class="btn-secondary" href="{{ route('doctors.show', $doctor->id) }}">全部日期</a>
         </form>

@@ -13,6 +13,6 @@
     <section class="mt-8 grid gap-5 md:grid-cols-3" aria-label="使用说明">
         <article class="panel"><p class="eyebrow">患者</p><h2 class="mt-2 text-lg font-semibold">管理本人资料</h2><p class="mt-3 text-slate-600">注册时填写虚构姓名与联系方式，无需身份证。资料仅由本人维护。</p></article>
         <article class="panel"><p class="eyebrow">医生</p><h2 class="mt-2 text-lg font-semibold">只读出诊工作台</h2><p class="mt-3 text-slate-600">使用管理员建立的账号登录，查看本人排班与时段安排。</p></article>
-        <article class="panel"><p class="eyebrow">当前阶段</p><h2 class="mt-2 text-lg font-semibold">P3 · 预约核心</h2><p class="mt-3 text-slate-600">患者可选择时段预约并查看待支付订单。模拟支付将在下一阶段开放，当前没有付款入口。</p></article>
+        <article class="panel"><p class="eyebrow">当前阶段</p><h2 class="mt-2 text-lg font-semibold">P4 · 模拟支付与生命周期</h2><p class="mt-3 text-slate-600">患者可预约并体验模拟微信支付；管理员逐条处理退款。无实际扣款。</p></article>
     </section>
 @endsection
