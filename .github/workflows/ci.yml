@@ -40,7 +40,9 @@ jobs:
       - name: Check PHP style
         run: php vendor/bin/pint --test
       - name: Analyse application types with Larastan
-        run: composer analyse
+        run: |
+          export APP_KEY="$(php -r 'echo "base64:".base64_encode(random_bytes(32));')"
+          composer analyse
       - name: Audit PHP dependencies
         run: composer audit
 

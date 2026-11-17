@@ -8,8 +8,18 @@ dev_project="${project}-dev"
 compose=(docker compose --project-name "$project")
 dev_compose=(docker compose --project-name "$dev_project" -f compose.yaml -f .devcontainer/compose.yaml)
 cleanup() {
+    result=$?
+    set +e
+    if [[ "$result" -ne 0 ]]; then
+        # Only explicit status fields and redacted booleans/classes; never dump logs or env.
+        "${compose[@]}" ps --all --format 'table {{.Service}}\t{{.State}}\t{{.Health}}'
+        "${compose[@]}" exec -T app php scripts/demo/diagnose.php
+        "${dev_compose[@]}" ps --all --format 'table {{.Service}}\t{{.State}}\t{{.Health}}'
+        "${dev_compose[@]}" exec -T app php scripts/demo/diagnose.php
+    fi
     "${compose[@]}" down --volumes --remove-orphans
     "${dev_compose[@]}" down --volumes --remove-orphans
+    exit "$result"
 }
 trap cleanup EXIT
 

@@ -1,5 +1,7 @@
 # Roadmap
 
+公开看板：[MediQueue Roadmap](https://github.com/users/SynapseOperator/projects/1)。下列六个 Issue 均已关联，初始状态为 Todo。
+
 v1.0 的课程范围是单医院预约、模拟支付、数据库正确性和可复核实验。以下是开放讨论的后续方向，不代表已实现，也不改变当前版本的冻结规则；暂无日期承诺。
 
 | 方向 | 先解决的问题 | 讨论 |
