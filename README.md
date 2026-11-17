@@ -4,7 +4,7 @@
 
 单医院、多科室的医院预约挂号课程项目。采用 PHP 8.4 / Laravel 13、MySQL 8.4、Blade / Tailwind CSS / Vite。
 
-当前为 **P2 账户与医院资源阶段**：P1 已验收合并。已实现患者注册、登录退出、本人资料，三角色服务端权限，科室/医生公开目录，医生只读工作台，以及管理员的科室、医生、排班和号源管理。预约、抢号、模拟支付、退款及统计业务流程留在 P3—P5，当前不能作为完整医院系统使用。[P2 验证记录](docs/verification/P2.md) · [认证与资源设计](docs/architecture/adr-0003-p2-auth-resources.md) · [ER 图与表结构](docs/architecture/p1-database-schema.md) · [P1 历史记录](docs/verification/P1.md)。
+当前为 **P3 预约核心阶段**：保留 P2 认证、角色权限与资源管理，新增患者预约、本人预约列表及待支付订单详情。预约占号、金额快照、订单和审计在同一事务提交，支持原请求标识重试、跨医生时间冲突保护及真实多进程并发验证。模拟支付、取消、到期回收和退款留在 P4；当前不能作为完整医院系统使用。[P3 验证记录](docs/verification/P3.md) · [预约事务设计](docs/architecture/adr-0004-p3-appointments.md) · [P2 历史记录](docs/verification/P2.md) · [ER 图与表结构](docs/architecture/p1-database-schema.md)。
 
 本期支付路线仅为 **模拟微信支付／无实际扣款**，不接入真实商户，不用于真实临床服务。所有演示资料均须为合成数据。当前未提供付款入口，模拟开关默认关闭；之后也只允许显式 local/demo/testing 环境启用。
 
@@ -15,7 +15,7 @@
 ```sh
 git clone https://github.com/SynapseOperator/MediQueue.git
 cd MediQueue
-# 若 P2 尚未合并，先 git switch feat/p2-auth-resources
+# 若 P3 尚未合并，先 git switch feat/p3-appointment-core
 composer install
 php scripts/setup-local.php
 docker compose --env-file .env.database up -d --wait
@@ -76,9 +76,9 @@ php artisan migrate --env=testing --force
 php artisan test --log-junit test-results/junit.xml
 ```
 
-数据库测试明确要求 MySQL 8.x 和专用 `mediqueue_test`，在测试 DDL 前核验实际数据库，不能指向业务库或用 SQLite 代替。保留 P0/P1 全部有效检查，P2 新增真实 Session/CSRF、角色和对象归属、资源历史及时间约束、管理事务回滚和双进程资源锁竞争测试。运行时应独占测试库，不同时启动两套 PHPUnit；本轮不以管理并发测试代替 P3 抢号或 P4 支付竞态验收。
+数据库测试明确要求 MySQL 8.x 和专用 `mediqueue_test`，在测试 DDL 前核验实际数据库，不能指向业务库或用 SQLite 代替。保留 P0/P1/P2 全部有效检查；P3 新增预约事务、幂等、故障回滚、有限重试和真实多进程抢号/停诊竞争测试。运行时应独占测试库，不同时启动两套 PHPUnit。单独运行 P3 并发：`php artisan test --filter=AppointmentConcurrencyTest`，四份 JSON 证据写入被忽略的 `test-results/appointment-concurrency-*.json`，含实际 PID、MySQL 连接 ID、结果和占用核对；不代替 P4 支付竞态验收。
 
-[GitHub Actions](https://github.com/SynapseOperator/MediQueue/actions/workflows/ci.yml) 在 PR、main push、手动触发时执行四项必需检查：`quality`、`mysql`、`frontend`、`secrets`。使用锁定 SHA 的 actions；MySQL 服务隔离、凭据临时生成；Gitleaks 扫描全部 Git 历史并隐藏匹配值。JUnit 结果作为 CI artifact 保存，不上传环境文件或应用日志。
+[GitHub Actions](https://github.com/SynapseOperator/MediQueue/actions/workflows/ci.yml) 在 PR、main push、手动触发时执行四项必需检查：`quality`、`mysql`、`frontend`、`secrets`。使用锁定 SHA 的 actions；MySQL 服务隔离、凭据临时生成；Gitleaks 扫描全部 Git 历史并隐藏匹配值。JUnit 与 P3 并发 JSON 随 `mysql-junit` artifact 保存，不上传环境文件或应用日志。
 
 ## 工程与演示
 
@@ -87,6 +87,7 @@ php artisan test --log-junit test-results/junit.xml
 - `database/migrations/`：users、patients、departments、doctors、schedules、slots、appointments、payment_orders、refunds、audit_logs 共十张核心表；sessions 与 migrations 是额外的框架技术表。
 - `app/Models/User.php`：适配 `password_hash`；`routes/auth.php` 与角色中间件处理认证和权限。
 - `app/Http/Controllers/AdminResourceController.php`：受锁保护的医院资源管理与同事务审计。
+- `app/Services/AppointmentService.php`：患者锁、资源资格保护、条件占号、预约/订单/审计事务及原请求标识恢复。
 - `resources/views/`：统一布局的认证、患者、目录、医生工作台和管理页面，使用系统字体，无外部素材。
 - `tests/`：配置边界及真实 MySQL 基础测试；`docker/`、`scripts/` 提供环境复现。
 - `docs/spec/`：冻结规范；`docs/architecture/`：工程决定；`docs/verification/`：实际验证证据。
@@ -113,11 +114,16 @@ php artisan mediqueue:demo-password demo_patient_1
 |---|---|
 | `/register`、`/login` | 未登录访客注册患者或登录现有账号 |
 | `/patient/profile` | 患者仅维护本人姓名与联系方式 |
+| `POST /appointments`、`GET /appointments`、`GET /appointments/{id}` | 仅患者；从当前登录账号确定患者，创建预约及查看本人列表/详情 |
 | `/departments`、`/doctors` | 公开科室、医生及未来 7 个自然日的开放时段；窗口可在 config/mediqueue.php 调整 |
 | `/doctor/workbench` | 医生仅查看本人排班，不能编辑或进入他人排班详情 |
 | `/admin/resources` | 管理员创建/编辑/启停科室和医生，配置草稿排班/号源后发布、停诊或关闭 |
 
 排班与号源输入、显示均为北京时间，写入 UTC。相邻时段允许，重叠拒绝；已有预约的时间/关联冻结，时段开始后容量冻结，费用修改不更新已有预约金额。基础资源通过停用、关闭保留历史，无物理删除入口。医生资源的 `doctors.status` 和登录账号的 `users.status` 分别控制资源与账户；停用医生资源不会自动禁用其历史工作台，停用账号则拒绝新登录和旧会话。
+
+患者在医生详情页点击预约，随后查看待支付订单；支付截止为锁内创建时间加 15 分钟与就诊开始的较早者。请求只接受 `slot_id` 和 `request_key`（另含 CSRF token）；标识为 16–64 位 ASCII 字母、数字、下划线或连字符，保留大小写、不裁剪。相同标识必须使用相同号源，重复返回原记录；网络结果未知时先查看“我的预约”或用原标识重试，不换新标识占号。
+
+当前只有待支付创建，没有付款、取消或回收入口。截止已到时页面明确显示付款资格失效，但 `PENDING_PAYMENT` 的名额仍被占用，不能靠刷新或重试释放；P4 将实现正式回收事务。不要清空业务库或手改 occupied_count 来演示空位，需要更多演示时段时由管理员合法创建。
 
 `main` 已要求 PR、四项 CI 通过与讨论解决，禁止强推和删除，管理员也受规则约束。个人项目不设置无法自行满足的他人 approval 数量；负责人已授权在本地检查、独立复核和最新 CI 均通过且无遗留问题时自行合并。仓库不启用无人核验的自动合并，不绕过保护。
 
@@ -128,4 +134,4 @@ php artisan mediqueue:demo-password demo_patient_1
 - [数据库设计 V1.1](docs/spec/MediQueue_Database_Design_V1.1.md)
 - [模拟微信支付设计 V1.1](docs/spec/MediQueue_Mock_WeChat_Payment_Design_V1.1.md)
 
-遵循 [贡献指南](CONTRIBUTING.md) 与 [安全报告流程](SECURITY.md)，采用 [MIT License](LICENSE)。下一阶段为 P3 预约事务、幂等和真实并发抢号验证；本轮不提前实现。老师是否接受模拟支付作为课程“在线挂号支付”仍属外部验收事项。
+遵循 [贡献指南](CONTRIBUTING.md) 与 [安全报告流程](SECURITY.md)，采用 [MIT License](LICENSE)。下一阶段 P4 将实现模拟支付、取消、定时及按需回收、退款与人工完成的生命周期；本轮未提前实现。老师是否接受模拟支付作为课程“在线挂号支付”仍属外部验收事项。

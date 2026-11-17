@@ -47,7 +47,7 @@ class HospitalDirectoryController extends Controller
             ->where('slots.starts_at', '>', CarbonImmutable::now('UTC')->format('Y-m-d H:i:s.v'))
             ->when($input['date'] ?? null, fn (Builder $query, $date) => $query->where('schedules.work_date', $date))
             ->orderBy('slots.starts_at')
-            ->select('slots.starts_at', 'slots.ends_at', 'slots.capacity', 'slots.occupied_count', 'slots.fee_amount', 'schedules.work_date', 'departments.name as department_name')
+            ->select('slots.id', 'slots.starts_at', 'slots.ends_at', 'slots.capacity', 'slots.occupied_count', 'slots.fee_amount', 'schedules.work_date', 'departments.name as department_name')
             ->paginate(20)->withQueryString();
 
         return view('hospital.doctor', compact('doctor', 'slots', 'today', 'lastDay'));
