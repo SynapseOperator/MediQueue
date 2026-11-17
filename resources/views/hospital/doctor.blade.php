@@ -94,6 +94,6 @@
             @endforelse
         </div>
         <div class="mt-7">{{ $slots->links() }}</div>
-        <p class="mt-3 text-xs leading-6 text-slate-500">模拟微信支付仅用于课程演示，无实际扣款。当前页面展示的剩余名额可能因其他患者同时预约而变化。</p>
+        <p class="mt-3 text-xs leading-6 text-slate-500">模拟微信支付（无实际扣款）仅用于课程演示。当前页面展示的剩余名额可能因其他患者同时预约而变化。</p>
     </section>
 @endsection
