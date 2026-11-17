@@ -1,0 +1,88 @@
+{
+  "label": "真实操作步骤节选",
+  "duration_seconds": 90,
+  "captured": "2026-11-17",
+  "appointment_id": 17,
+  "slot_id": 13,
+  "states": [
+    "PENDING_PAYMENT",
+    "CONFIRMED / PAID",
+    "CANCELLED / REFUND_PENDING",
+    "FAILED",
+    "SUCCEEDED / REFUNDED"
+  ],
+  "frames": [
+    {
+      "step": 1,
+      "caption": "首页",
+      "duration_ms": 5000,
+      "source_sha256": "f4b6fdbc9d0b68fddc421b25168648071a21eaa21379ca0bbceeffa6a6d9388e"
+    },
+    {
+      "step": 2,
+      "caption": "医生列表",
+      "duration_ms": 6000,
+      "source_sha256": "01a685a5f162c56f10479b2e5222b34ca02afeb43c53eb8149891b4c798eab78"
+    },
+    {
+      "step": 3,
+      "caption": "医生与可预约时段",
+      "duration_ms": 7000,
+      "source_sha256": "10cd4ec5203d26ea5e9ecd612111f87c436b4f0c7e62535d78cc9184749627ca"
+    },
+    {
+      "step": 4,
+      "caption": "核对预约",
+      "duration_ms": 9000,
+      "source_sha256": "e0e3ff9cd8aebf5da92eab343e958bffd03210f280c4f0f191ca692dfa5ed714"
+    },
+    {
+      "step": 5,
+      "caption": "待支付",
+      "duration_ms": 7000,
+      "source_sha256": "7a7fa25ced0e09852a7a543813a787224d8ac6586629165859d9349e279bbce6"
+    },
+    {
+      "step": 6,
+      "caption": "模拟收银台",
+      "duration_ms": 9000,
+      "source_sha256": "c27d1eff918fd3548b9e562eb46ba0e243e793435da811f5e46cc552667297f6"
+    },
+    {
+      "step": 7,
+      "caption": "模拟支付成功",
+      "duration_ms": 9000,
+      "source_sha256": "685e126bf6a4d920e73c7bd7e2debfc7d12bec0a194b68180b12627ed74b4787"
+    },
+    {
+      "step": 8,
+      "caption": "取消与待退款",
+      "duration_ms": 9000,
+      "source_sha256": "9a34ca4bbc70b68b336566b7faafe096994e63195b948c6ace6bf5b9231169cf"
+    },
+    {
+      "step": 9,
+      "caption": "管理员核实",
+      "duration_ms": 7000,
+      "source_sha256": "7fdb5cb68908e19e4a48358ad39d468b56d8212bf5b02e55048e49f3dec8c214"
+    },
+    {
+      "step": 10,
+      "caption": "选择模拟失败",
+      "duration_ms": 6000,
+      "source_sha256": "e1437d52697fe3d424006c9b1f37bb74b484aacce478df4d5d026bad9c038881"
+    },
+    {
+      "step": 11,
+      "caption": "退款失败",
+      "duration_ms": 7000,
+      "source_sha256": "2c92e0f70d74b173254483fa43058bcd3d8558036053091d731cac0d20ca9f98"
+    },
+    {
+      "step": 12,
+      "caption": "重试成功",
+      "duration_ms": 9000,
+      "source_sha256": "5fcf71c7d6a273094a3e1e37387c2f983e7f6adaf8a9496a0d7a54987f2b5f43"
+    }
+  ]
+}

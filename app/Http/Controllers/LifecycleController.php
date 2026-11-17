@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\AppointmentStatus;
+use App\Enums\RefundStatus;
 use App\Services\AppointmentLifecycleService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
@@ -38,7 +41,7 @@ class LifecycleController extends Controller
     public function adminIndex(Request $request): View
     {
         $input = $request->validate([
-            'status' => ['nullable', 'in:PENDING_PAYMENT,CONFIRMED,COMPLETED,CANCELLED,EXPIRED'],
+            'status' => ['nullable', Rule::enum(AppointmentStatus::class)],
             'department' => ['nullable', 'integer', 'min:1'], 'attention' => ['nullable', 'in:refund,suspended,unverified'],
         ]);
         $appointments = DB::table('appointments')->join('payment_orders', 'payment_orders.appointment_id', '=', 'appointments.id')
@@ -48,9 +51,9 @@ class LifecycleController extends Controller
             ->join('departments', 'departments.id', '=', 'schedules.department_id')
             ->when($input['status'] ?? null, fn ($query, $status) => $query->where('appointments.status', $status))
             ->when($input['department'] ?? null, fn ($query, $id) => $query->where('schedules.department_id', $id))
-            ->when(($input['attention'] ?? null) === 'refund', fn ($query) => $query->whereIn('refunds.status', ['PENDING', 'FAILED']))
-            ->when(($input['attention'] ?? null) === 'suspended', fn ($query) => $query->where('schedules.status', 'SUSPENDED')->whereIn('appointments.status', ['PENDING_PAYMENT', 'CONFIRMED']))
-            ->when(($input['attention'] ?? null) === 'unverified', fn ($query) => $query->where('appointments.status', 'CONFIRMED')->where('slots.ends_at', '<=', now('UTC')->format('Y-m-d H:i:s.v')))
+            ->when(($input['attention'] ?? null) === 'refund', fn ($query) => $query->whereIn('refunds.status', [RefundStatus::Pending->value, RefundStatus::Failed->value]))
+            ->when(($input['attention'] ?? null) === 'suspended', fn ($query) => $query->where('schedules.status', 'SUSPENDED')->whereIn('appointments.status', [AppointmentStatus::PendingPayment->value, AppointmentStatus::Confirmed->value]))
+            ->when(($input['attention'] ?? null) === 'unverified', fn ($query) => $query->where('appointments.status', AppointmentStatus::Confirmed->value)->where('slots.ends_at', '<=', now('UTC')->format('Y-m-d H:i:s.v')))
             ->select('appointments.id', 'appointments.appointment_no', 'appointments.status', 'payment_orders.status as order_status', 'refunds.status as refund_status',
                 'patients.full_name as patient_name', 'doctors.full_name as doctor_name', 'departments.name as department_name', 'slots.starts_at', 'appointments.fee_amount')
             ->orderByDesc('appointments.id')->paginate(20)->withQueryString();

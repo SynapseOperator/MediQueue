@@ -12,7 +12,7 @@ class PatientProfileController extends Controller
     public function edit(Request $request): View
     {
         $patient = DB::table('patients')->where('user_id', $request->user()->id)->first();
-        abort_unless($patient, 403);
+        abort_unless($patient !== null, 403);
 
         return view('patient.profile', ['patient' => $patient, 'user' => $request->user()]);
     }
@@ -28,7 +28,7 @@ class PatientProfileController extends Controller
 
         DB::transaction(function () use ($request, $data): void {
             $patient = DB::table('patients')->where('user_id', $request->user()->id)->lockForUpdate()->first();
-            abort_unless($patient, 403);
+            abort_unless($patient !== null, 403);
 
             $now = now('UTC')->format('Y-m-d H:i:s.v');
             DB::table('patients')->where('id', $patient->id)->update([

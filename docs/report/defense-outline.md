@@ -1,6 +1,6 @@
 # MediQueue：5—7分钟答辩提纲
 
-目标约6分30秒。只演示合成资料，始终明确“模拟微信支付／无实际扣款”。事实依据为[课程报告](MediQueue-course-report.md)与[AC矩阵](../verification/p6-acceptance-matrix.md)；性能、恢复和CI只引用已取得的最终证据。
+目标约6分30秒。只演示合成资料，始终明确“模拟微信支付／无实际扣款”。事实依据为[课程报告](MediQueue-course-report.md)与[AC矩阵](../archive/verification/p6-acceptance-matrix.md)；性能、恢复和CI只引用已取得的最终证据。
 
 ## 上台前
 
@@ -20,7 +20,7 @@
 
 选择未来时段→确认本人/金额→创建→模拟付款成功→查看CONFIRMED/PAID→开始前取消。说明退款先PENDING，未宣称到账；管理员另处理。实际截止取15分钟和开始较早者，过期资格不等清理器。
 
-若现场无合适名额，使用[P5确认图](../verification/screenshots/p5/confirm.jpg)和[收银台图](../verification/screenshots/p5/payment.jpg)，明确历史截图来源。
+若现场无合适名额，使用[P5确认图](../archive/verification/screenshots/p5/confirm.jpg)和[收银台图](../archive/verification/screenshots/p5/payment.jpg)，明确历史截图来源。
 
 ## 2:35—3:40：并发与异常
 
@@ -38,7 +38,7 @@
 
 引用[性能实测](../performance/p6-report.md)：5万预约/订单、100患者各500条、1000时段；预热后7次，中位到期查询0.3130ms，对照9.0846ms。实际八表历史页面2.4467/2.4713ms且没有用created_at索引，不能套简化查询收益。全部是均匀待支付未回收数据，未测写入和空间；不把cost当毫秒。
 
-展示[恢复证据](../verification/p6-backup-results.json)：12表全行哈希一致、2视图/2例程、孤立/金额/容量差异0；恢复库预约9真实完成付款→取消→退款失败→原记录成功，源库摘要不变。强调不是只生成SQL文件，也未清空原业务库；同机演练不代表异地灾备。
+展示[恢复证据](../archive/verification/p6-backup-results.json)：12表全行哈希一致、2视图/2例程、孤立/金额/容量差异0；恢复库预约9真实完成付款→取消→退款失败→原记录成功，源库摘要不变。强调不是只生成SQL文件，也未清空原业务库；同机演练不代表异地灾备。
 
 ## 5:30—6:30：验收与边界
 

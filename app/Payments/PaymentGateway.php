@@ -2,14 +2,21 @@
 
 namespace App\Payments;
 
+use stdClass;
+
 interface PaymentGateway
 {
-    /** Produce a server-side demonstration event, never a client-supplied paid status. */
-    public function payment(object $order, string $scenario): array;
+    /**
+     * Produce a server-side demonstration event, never a client-supplied paid status.
+     *
+     * @param  'success'|'declined'|'unknown'  $scenario
+     */
+    public function payment(stdClass $order, string $scenario): array;
 
-    public function query(object $order): array;
+    public function query(stdClass $order): array;
 
-    public function close(object $order): string;
+    public function close(stdClass $order): string;
 
-    public function refund(object $order, object $refund, string $scenario): array;
+    /** @param 'success'|'failed'|'unknown' $scenario */
+    public function refund(stdClass $order, stdClass $refund, string $scenario): array;
 }

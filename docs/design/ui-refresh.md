@@ -52,9 +52,9 @@
 - 管理：统计概览/明细、排班表单、审计、管理员模拟退款；数据口径无变化。
 - 可访问性：Tab 键焦点、菜单 summary 键盘操作、对比度、200% 放大。
 - 对比截图：同一视口分别保存首页、医生目录、医生时段、预约确认、模拟支付、管理概览；只用合成数据。
-- GitHub：`quality/mysql/frontend/secrets` 与此前全部真实 MySQL 测试通过；视觉验收完成后再由负责人决定合并。
+- GitHub：`quality/mysql/frontend/secrets` 与此前全部真实 MySQL 测试通过；视觉验收完成后通过 PR 复核。
 
-初始PR仅完成远端自动化检查；后续在Windows本机实际浏览器补验，范围和截图见[视觉验收记录](../verification/ui-refresh-browser.md)。本机上线由负责人明确授权在验收和必需CI通过后执行，不部署到公网。
+初始PR仅完成远端自动化检查；后续在Windows本机实际浏览器补验，范围和截图见[视觉验收记录](../archive/verification/ui-refresh-browser.md)。本次发布目标是本地演示环境。
 
 ## 浏览器验收中修复的问题
 

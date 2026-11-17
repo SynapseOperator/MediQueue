@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\AppointmentStatus;
 use App\Services\AppointmentService;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
@@ -56,7 +58,7 @@ class AppointmentController extends Controller
 
     public function index(Request $request): View
     {
-        $input = $request->validate(['status' => ['nullable', 'in:PENDING_PAYMENT,CONFIRMED,COMPLETED,CANCELLED,EXPIRED']]);
+        $input = $request->validate(['status' => ['nullable', Rule::enum(AppointmentStatus::class)]]);
         $appointments = DB::table('appointments')->join('patients', 'patients.id', '=', 'appointments.patient_id')
             ->join('slots', 'slots.id', '=', 'appointments.slot_id')->join('schedules', 'schedules.id', '=', 'slots.schedule_id')
             ->join('doctors', 'doctors.id', '=', 'schedules.doctor_id')->join('departments', 'departments.id', '=', 'schedules.department_id')

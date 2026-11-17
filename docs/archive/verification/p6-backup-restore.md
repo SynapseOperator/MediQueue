@@ -1,15 +1,14 @@
 # P6 逻辑备份与隔离恢复实验
 
-2026-11-17 实际执行；机器为本机 Windows，MySQL 8.4.13 原生实例 127.0.0.1:3308。源库 `mediqueue`，最终复核后的新恢复库 `mediqueue_restore_p6_20261117_verified`。没有覆盖业务库、修改既有密码或删除 Docker 数据。完整可公开证据是 [p6-backup-results.json](p6-backup-results.json)，复现工具是 [backup-restore.php](../../scripts/backup-restore.php)。
+2026-11-17 实际执行；环境为 Windows、MySQL 8.4.13 原生实例。源库 `mediqueue`，最终复核后的新恢复库 `mediqueue_restore_p6_20261117_verified`。没有覆盖业务库或修改既有密码。完整可公开证据是 [p6-backup-results.json](p6-backup-results.json)，复现工具是 [backup-restore.php](../../../scripts/backup-restore.php)。
 
 ## 命令、凭据与一致性
 
 ```powershell
-$env:Path = 'D:\Bread_coding\.tools\mediqueue\php;' + $env:Path
-php scripts/backup-restore.php --mysql-bin=D:/Bread_coding/.tools/mediqueue/mysql/bin --label=20261117_verified
+php scripts/backup-restore.php --mysql-bin='<mysql-bin-directory>' --label=20261117_verified
 ```
 
-该次退出0。再次执行必须用新 label；脚本拒绝已存在的目录或目标库，不自行删除重建。先完成浏览器操作并保持演示库空闲；期间不运行 migration 或资源管理。脚本在备份前后核对源数据摘要，若发现并发改动会停止验证，保留备份供调查，再使用新标签重做。
+该次退出0；上方以安装目录占位符公开命令形状。再次执行必须用新 label；脚本拒绝已存在的目录或目标库，不自行删除重建。先完成浏览器操作并保持演示库空闲；期间不运行 migration 或资源管理。脚本在备份前后核对源数据摘要，若发现并发改动会停止验证，保留备份供调查，再使用新标签重做。
 
 脚本在受限内存读取 `.env.database` 的 DBA 密码，临时 `--defaults-extra-file` 只在当前用户独占 ACL 的 `.local/backups/<label>/` 中创建，完成后删除；密码不在命令参数或公共输出中。原始 SQL 含密码哈希、会话与内部审计，**只保留在被 Git 忽略的私有目录，不发布**。公开证据只有总数、全表摘要、对象及检查结果；不是数据库内容导出。恢复业务冒烟另用新建的 DML+两个对象 EXECUTE 临时账号，验证结束后删除此账号，保留恢复数据库。
 
