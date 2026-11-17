@@ -1,0 +1,35 @@
+name: 缺陷报告
+description: 报告可复现的功能或工程问题；安全漏洞请使用私密报告。
+title: "[Bug] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        请只提供合成数据，不粘贴 .env、令牌、密码或真实患者资料。
+        安全问题请先阅读 [SECURITY.md](https://github.com/SynapseOperator/MediQueue/blob/main/SECURITY.md)。
+  - type: input
+    id: version
+    attributes:
+      label: 版本与环境
+      description: Commit SHA 或分支，以及 PHP、MySQL、操作系统版本。
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: 复现步骤
+      description: 提供最小步骤及所用合成数据；注明是否稳定复现。
+    validations:
+      required: true
+  - type: textarea
+    id: behavior
+    attributes:
+      label: 预期与实际结果
+      description: 如涉及冻结业务规则，请标出 BR、FR 或 AC 编号。
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: 已脱敏的证据
+      description: 可选。提供命令、退出码、必要日志或截图，不包含凭据和个人资料。

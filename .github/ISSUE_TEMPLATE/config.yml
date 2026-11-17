@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 私密安全报告
+    url: https://github.com/SynapseOperator/MediQueue/security/advisories/new
+    about: 优先使用私密入口；不可用时仅提“请求安全联系渠道”Issue，不公开漏洞细节。
