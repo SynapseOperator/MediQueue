@@ -1,10 +1,10 @@
 # MediQueue
 
-![CI](https://github.com/SynapseOperator/MediQueue/actions/workflows/ci.yml/badge.svg?branch=feat%2Fp0-foundation)
+![CI](https://github.com/SynapseOperator/MediQueue/actions/workflows/ci.yml/badge.svg?branch=main)
 
 单医院、多科室的医院预约挂号课程项目。采用 PHP 8.4 / Laravel 13、MySQL 8.4、Blade / Tailwind CSS / Vite。
 
-当前为 **P0 基础工程，待负责人验收**：首页、数据库 session、存活/就绪检查、真实 MySQL 基础测试与 GitHub Actions。账户、十张业务表、预约、支付、退款及统计尚未实现，不能作为完整医院系统使用。[实际验证记录](docs/verification/P0.md)。
+当前为 **P0 基础工程，已通过阶段性代码审查，待收尾检查及负责人手动合并**：首页、数据库 session、存活/就绪检查、真实 MySQL 基础测试与 GitHub Actions。账户、十张业务表、预约、支付、退款及统计尚未实现，不能作为完整医院系统使用。[实际验证记录](docs/verification/P0.md)。
 
 本期支付路线仅为 **模拟微信支付／无实际扣款**，不接入真实商户，不用于真实临床服务。所有演示资料均须为合成数据。P0 未提供付款入口，模拟开关默认关闭；之后也只允许显式 local/demo/testing 环境启用。
 
