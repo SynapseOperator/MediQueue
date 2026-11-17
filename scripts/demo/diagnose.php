@@ -7,6 +7,10 @@ use Illuminate\Support\Facades\DB;
 $root = dirname(__DIR__, 2);
 $report = [
     'demo_env_readable' => is_readable($root.'/.env.demo'),
+    'demo_env_is_symlink' => is_link($root.'/.env.demo'),
+    'demo_env_link_resolves' => realpath($root.'/.env.demo') !== false,
+    'project_root_sticky' => (fileperms($root) & 01000) !== 0,
+    'project_root_world_writable' => (fileperms($root) & 00002) !== 0,
     'runtime_env_readable' => is_readable('/run/mediqueue-runtime/app.env'),
     'storage_writable' => is_writable($root.'/storage'),
     'views_writable' => is_writable($root.'/storage/framework/views'),

@@ -19,6 +19,8 @@ COPY . .
 RUN composer dump-autoload --no-dev --optimize \
     && mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs bootstrap/cache \
     && ln -s /run/mediqueue-runtime/app.env .env.demo \
+    && chown root:root /var/www/html \
+    && chmod 0755 /var/www/html \
     && chown -R www-data:www-data storage bootstrap/cache
 COPY --from=frontend /build/public/build public/build
 ENV APP_ENV=demo
