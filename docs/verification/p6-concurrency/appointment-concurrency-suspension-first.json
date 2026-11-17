@@ -1,0 +1,61 @@
+{
+    "scenario": "suspension-first",
+    "database": "mediqueue_test",
+    "isolation": "READ-COMMITTED",
+    "participants": 2,
+    "workers": [
+        {
+            "phase": "result",
+            "outcome": "suspended",
+            "pid": 44252,
+            "connection_id": 51,
+            "operation": "suspend",
+            "user_id": 162,
+            "slot_id": null
+        },
+        {
+            "phase": "result",
+            "outcome": "rejected",
+            "fields": [
+                "slot_id"
+            ],
+            "pid": 14024,
+            "connection_id": 52,
+            "operation": "appointment",
+            "user_id": 165,
+            "slot_id": 98
+        }
+    ],
+    "final_state": {
+        "appointments": 0,
+        "payment_orders": 0,
+        "appointment_audits": 0,
+        "management_audits": 1,
+        "slots": [
+            {
+                "id": 98,
+                "capacity": 3,
+                "occupied_count": 0,
+                "actual": 0
+            },
+            {
+                "id": 99,
+                "capacity": 2,
+                "occupied_count": 0,
+                "actual": 0
+            },
+            {
+                "id": 100,
+                "capacity": 3,
+                "occupied_count": 0,
+                "actual": 0
+            },
+            {
+                "id": 101,
+                "capacity": 2,
+                "occupied_count": 0,
+                "actual": 0
+            }
+        ]
+    }
+}

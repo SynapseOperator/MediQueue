@@ -1,0 +1,87 @@
+{
+    "scenario": "refund-success-failure",
+    "database": "mediqueue_test",
+    "isolation": "READ-COMMITTED",
+    "clock_mode": "Explicit controlled UTC time in each testing process; no production deadline change.",
+    "participants": 2,
+    "workers": [
+        {
+            "phase": "result",
+            "outcome": "returned",
+            "result": "SUCCEEDED",
+            "pid": 65384,
+            "connection_id": 256,
+            "operation": "refund",
+            "appointment_id": 162,
+            "test_now": "2026-11-16 20:30:00.123"
+        },
+        {
+            "phase": "result",
+            "outcome": "returned",
+            "result": "SUCCEEDED",
+            "pid": 44548,
+            "connection_id": 257,
+            "operation": "refund",
+            "appointment_id": 162,
+            "test_now": "2026-11-16 20:30:00.123"
+        }
+    ],
+    "final_state": {
+        "appointment_status": "CANCELLED",
+        "order_status": "REFUNDED",
+        "refund_status": "SUCCEEDED",
+        "refund_count": 1,
+        "amount": "12.34",
+        "expires_at": "2026-11-16 20:45:00.123",
+        "paid_at": "2026-11-16 20:30:00.123",
+        "released_at": "2026-11-16 20:30:00.123",
+        "audits": [
+            {
+                "action": "APPOINTMENT_CANCELLED",
+                "count": 1
+            },
+            {
+                "action": "APPOINTMENT_CREATED",
+                "count": 1
+            },
+            {
+                "action": "PAYMENT_CONFIRMED",
+                "count": 1
+            },
+            {
+                "action": "REFUND_FAILED",
+                "count": 1
+            },
+            {
+                "action": "REFUND_SUCCEEDED",
+                "count": 1
+            }
+        ],
+        "slots": [
+            {
+                "id": 825,
+                "capacity": 3,
+                "occupied_count": 0,
+                "actual": 0
+            },
+            {
+                "id": 826,
+                "capacity": 2,
+                "occupied_count": 0,
+                "actual": 0
+            },
+            {
+                "id": 827,
+                "capacity": 3,
+                "occupied_count": 0,
+                "actual": 0
+            },
+            {
+                "id": 828,
+                "capacity": 2,
+                "occupied_count": 0,
+                "actual": 0
+            }
+        ]
+    }
+}

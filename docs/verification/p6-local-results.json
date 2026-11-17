@@ -1,0 +1,27 @@
+{
+  "command": "php scripts/run-schema.php test --compact --no-ansi --log-junit test-results/p6-local-junit.xml",
+  "finished_utc": "2026-11-17T10:23:34.4111257Z",
+  "tests": 234,
+  "assertions": 2939,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "junit_seconds": 30.128145,
+  "junit_sha256": "7d726a93c675e1242d12828fac3f4ee299ade656e6d83846c9dca0e6969cf9ba",
+  "database": "mediqueue_test",
+  "concurrency_evidence_files": [
+    "appointment-concurrency-appointment-first.json",
+    "appointment-concurrency-last-seat.json",
+    "appointment-concurrency-same-patient.json",
+    "appointment-concurrency-suspension-first.json",
+    "lifecycle-concurrency-cancellation-expiry-deadline.json",
+    "lifecycle-concurrency-duplicate-cancellation.json",
+    "lifecycle-concurrency-duplicate-payment.json",
+    "lifecycle-concurrency-payment-cancellation.json",
+    "lifecycle-concurrency-payment-expiry-deadline.json",
+    "lifecycle-concurrency-payment-first.json",
+    "lifecycle-concurrency-refund-success-failure.json",
+    "lifecycle-concurrency-suspension-first.json",
+    "lifecycle-concurrency-two-reclaim-entrances.json"
+  ]
+}
