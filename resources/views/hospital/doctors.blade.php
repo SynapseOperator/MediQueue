@@ -40,7 +40,7 @@
             </article>
         @empty
             <div class="empty-state col-span-full">
-                <p class="text-lg font-bold text-slate-700">当前没有符合条件的医生</p>
+                <p class="text-lg font-bold text-slate-700">当前暂无开放医生</p>
                 <p class="mt-2 text-sm">可以尝试选择其他科室，或稍后再来查看。</p>
                 <a class="btn-secondary mt-5" href="{{ route('doctors.index') }}">显示全部科室</a>
             </div>
