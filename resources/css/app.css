@@ -1,29 +1,31 @@
 @import 'tailwindcss';
-
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 @source '../views/**/*.blade.php';
-
-@theme {
-    --font-sans: ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+@theme { --font-sans: ui-sans-serif, system-ui, 'Microsoft YaHei', sans-serif; }
+@layer base {
+    body { @apply bg-[#f6f8f7] text-slate-800 antialiased; }
+    a, button, input, select, textarea, summary { @apply focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700; }
 }
-
 @layer components {
-    .panel { @apply rounded-2xl border border-slate-200 bg-white p-6 sm:p-7; }
-    .page-title { @apply text-3xl font-semibold tracking-tight; }
-    .eyebrow { @apply text-sm font-semibold text-teal-700; }
-    .nav-link { @apply text-sm font-medium text-slate-700 hover:text-teal-700; }
-    .text-link { @apply font-medium text-teal-700 underline-offset-4 hover:underline; }
-    .btn { @apply inline-flex cursor-pointer items-center justify-center rounded-lg bg-teal-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-teal-800; }
-    .btn-secondary { @apply inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium hover:bg-slate-100; }
-    .field { @apply flex flex-col gap-2 text-sm font-medium text-slate-700; }
-    .field input, .field select, .field textarea { @apply min-w-0 rounded-lg border border-slate-300 bg-white px-3 py-2.5 font-normal text-slate-950 focus:border-teal-600 focus:outline-2 focus:outline-teal-600; }
+    .panel { @apply rounded-2xl border border-[#dce8e5] bg-white p-6 shadow-[0_8px_30px_rgba(20,70,70,0.045)] sm:p-7; }
+    .surface-muted { @apply rounded-2xl border border-teal-100 bg-teal-50/60 p-5; }
+    .page-title { @apply text-3xl font-bold tracking-tight text-[#153c42] sm:text-4xl; }
+    .page-intro { @apply mt-3 max-w-3xl text-base leading-7 text-slate-600; }
+    .section-title { @apply text-xl font-bold tracking-tight text-[#153c42] sm:text-2xl; }
+    .eyebrow { @apply text-xs font-bold tracking-[0.14em] text-teal-700; }
+    .nav-link { @apply rounded-md text-sm font-semibold text-slate-600 hover:text-teal-800; }
+    .text-link { @apply font-semibold text-teal-700 underline-offset-4 hover:underline; }
+    .btn { @apply inline-flex min-h-11 cursor-pointer items-center justify-center rounded-xl bg-[#176b6d] px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-[#105457] disabled:cursor-wait disabled:opacity-60; }
+    .btn-secondary { @apply inline-flex min-h-11 items-center justify-center rounded-xl border border-[#c8dcda] bg-white px-5 py-2.5 text-sm font-semibold text-[#24565a] transition hover:bg-teal-50; }
+    .field { @apply flex flex-col gap-2 text-sm font-semibold text-slate-700; }
+    .field input, .field select, .field textarea { @apply min-w-0 rounded-xl border border-slate-300 bg-white px-3.5 py-3 font-normal text-slate-950 focus:border-teal-600 focus:outline-2 focus:outline-teal-600; }
     .field input[readonly] { @apply bg-slate-100 text-slate-500; }
     .hint { @apply text-xs font-normal leading-5 text-slate-500; }
-    .table-wrap { @apply overflow-x-auto rounded-xl border border-slate-200 bg-white; }
+    .status-badge { @apply inline-flex rounded-full bg-teal-50 px-3 py-1 text-xs font-bold text-teal-800; }
+    .table-wrap { @apply overflow-x-auto rounded-2xl border border-[#dce8e5] bg-white; }
     .table-wrap table { @apply w-full text-left text-sm; }
-    .table-wrap th { @apply whitespace-nowrap bg-slate-100 px-4 py-3 font-semibold; }
+    .table-wrap th { @apply whitespace-nowrap bg-[#eef6f4] px-4 py-3 font-semibold text-[#315d60]; }
     .table-wrap td { @apply border-t border-slate-100 px-4 py-4 align-top; }
     summary { @apply cursor-pointer font-semibold text-teal-800; }
 }

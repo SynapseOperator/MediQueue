@@ -14,11 +14,8 @@
                 <tr><td>{{ $slot->work_date }}</td><td>{{ \Carbon\CarbonImmutable::parse($slot->starts_at, 'UTC')->setTimezone(config('mediqueue.hospital_timezone'))->format('H:i') }}–{{ \Carbon\CarbonImmutable::parse($slot->ends_at, 'UTC')->setTimezone(config('mediqueue.hospital_timezone'))->format('H:i') }}</td><td>{{ $slot->department_name }}</td><td>¥{{ $slot->fee_amount }}</td><td>{{ $slot->capacity - $slot->occupied_count > 0 ? '剩余 '.($slot->capacity - $slot->occupied_count).' / '.$slot->capacity : '已满' }}</td><td>
                     @auth
                         @if(auth()->user()->role === 'PATIENT' && $slot->capacity > $slot->occupied_count)
-                            <form method="POST" action="{{ route('appointments.store') }}">@csrf
-                                <input type="hidden" name="slot_id" value="{{ $slot->id }}">
-                                <input type="hidden" name="request_key" value="{{ ($oldInput['slot_id'] ?? null) == $slot->id && isset($oldInput['request_key']) ? $oldInput['request_key'] : (string) \Illuminate\Support\Str::uuid() }}">
-                                <button class="btn" type="submit">预约</button>
-                            </form>
+                            @php($oldKey = old('request_key'))
+                            <form method="GET" action="{{ route('appointments.confirm') }}"><input type="hidden" name="slot_id" value="{{ $slot->id }}"><input type="hidden" name="request_key" value="{{ old('slot_id') == $slot->id && is_string($oldKey) && preg_match('/\A[a-zA-Z0-9_-]{16,64}\z/', $oldKey) ? $oldKey : (string) \Illuminate\Support\Str::uuid() }}"><button class="btn" type="submit">选择时段</button></form>
                         @endif
                     @else<a class="text-link" href="{{ route('login') }}">登录后预约</a>@endauth
                 </td></tr>

@@ -1,10 +1,14 @@
 <?php
 
 use App\Http\Controllers\AdminResourceController;
+use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\LifecycleController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'active', 'role:ADMIN'])->prefix('admin')->name('admin.')->group(function (): void {
+    Route::get('/', [AnalyticsController::class, 'dashboard'])->name('dashboard');
+    Route::get('/analytics', [AnalyticsController::class, 'analytics'])->name('analytics');
+    Route::get('/audit', [AnalyticsController::class, 'audit'])->name('audit');
     Route::get('/appointments', [LifecycleController::class, 'adminIndex'])->name('appointments.index');
     Route::get('/appointments/{id}', [LifecycleController::class, 'adminShow'])->whereNumber('id')->name('appointments.show');
     Route::post('/appointments/{id}/cancel', [LifecycleController::class, 'adminCancel'])->whereNumber('id')->name('appointments.cancel');

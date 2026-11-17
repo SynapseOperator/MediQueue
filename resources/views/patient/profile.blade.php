@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('title', '我的资料')
 @section('content')
-    <section class="panel mx-auto max-w-lg">
+    <section class="panel mx-auto max-w-lg border-t-4 border-t-teal-700">
         <p class="eyebrow">本人档案</p><h1 class="page-title mt-2">我的资料</h1>
         <p class="mt-3 text-sm text-slate-600">登录账号：{{ $user->username }} · 患者</p>
         <form method="POST" action="{{ route('patient.profile.update') }}" class="mt-7 space-y-5">
