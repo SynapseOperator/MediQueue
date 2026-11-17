@@ -1,3 +1,5 @@
 <?php
 
-// Scheduled appointment expiry is implemented and verified in P4.
+use Illuminate\Support\Facades\Schedule;
+
+Schedule::command('mediqueue:expire-appointments --limit=100')->everyMinute()->withoutOverlapping();

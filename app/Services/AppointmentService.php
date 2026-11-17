@@ -15,6 +15,10 @@ class AppointmentService
     /** The HTTP boundary validates input; all lifecycle writes start with this patient's lock. */
     public function create(int $userId, int $slotId, string $requestKey): int
     {
+        // Never reclaim other patients while holding this request's patient or resource locks.
+        $patientId = DB::table('patients')->where('user_id', $userId)->value('id');
+        abort_unless($patientId && DB::table('users')->where('id', $userId)->where('role', 'PATIENT')->where('status', 'ACTIVE')->exists(), 403);
+        app(AppointmentLifecycleService::class)->reclaim($patientId, $slotId);
         try {
             return DB::transaction(function () use ($userId, $slotId, $requestKey): int {
                 $patient = DB::table('patients')->where('user_id', $userId)->lockForUpdate()->first();

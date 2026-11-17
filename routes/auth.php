@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\LifecycleController;
 use App\Http\Controllers\PatientProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -22,5 +23,7 @@ Route::middleware(['auth', 'role:PATIENT'])->group(function (): void {
 Route::middleware(['auth', 'active', 'role:PATIENT'])->group(function (): void {
     Route::get('/appointments', [AppointmentController::class, 'index'])->name('appointments.index');
     Route::post('/appointments', [AppointmentController::class, 'store'])->name('appointments.store');
+    Route::post('/appointments/{id}/pay', [LifecycleController::class, 'pay'])->whereNumber('id')->middleware('signed')->name('appointments.pay');
+    Route::post('/appointments/{id}/cancel', [LifecycleController::class, 'patientCancel'])->whereNumber('id')->name('appointments.cancel');
     Route::get('/appointments/{id}', [AppointmentController::class, 'show'])->whereNumber('id')->name('appointments.show');
 });

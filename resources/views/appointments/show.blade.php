@@ -18,6 +18,19 @@
             @elseif($suspended)<p class="mt-5 text-red-700">出诊资源已停用或停诊，付款资格已失效；预约状态尚未改变。</p>
             @else<p class="mt-5">服务端计算的截止剩余时间：{{ $remaining }} 秒（页面加载时）。</p>@endif
         @endif
-        <p class="mt-5 text-slate-600">支付功能将在下一阶段开放，当前没有付款入口。</p>
+        <p class="mt-5 font-semibold">模拟微信支付／无实际扣款</p>
+        @if($appointment->refund_status)
+            <p class="mt-3">退款状态：{{ match($appointment->refund_status) { 'PENDING' => '待处理（仅模拟）', 'FAILED' => '失败（仅模拟）', 'SUCCEEDED' => '成功（仅模拟）' } }}（{{ $appointment->refund_no }}）。退款由管理员逐条处理。</p>
+            @if($appointment->last_error)<p class="mt-3 text-red-700">{{ $appointment->last_error }}</p>@endif
+        @endif
+        @if($appointment->status === 'PENDING_PAYMENT' && $appointment->order_status === 'UNPAID' && ! $expired && ! $suspended && config('mediqueue.mock_payments_enabled') && app()->environment(['local', 'demo', 'testing']))
+            <form class="mt-5" method="POST" action="{{ \Illuminate\Support\Facades\URL::temporarySignedRoute('appointments.pay', now()->addMinutes(5), ['id' => $appointment->id]) }}">@csrf
+                <label class="field">模拟结果<select name="scenario"><option value="success">成功</option><option value="declined">拒绝</option><option value="unknown">结果未知</option></select></label>
+                <button class="btn mt-3" type="submit">模拟微信支付（无实际扣款）</button>
+            </form>
+        @endif
+        @if(in_array($appointment->status, ['PENDING_PAYMENT', 'CONFIRMED'], true))
+            <form class="mt-5" method="POST" action="{{ route('appointments.cancel', $appointment->id) }}">@csrf<button class="btn-secondary" type="submit">取消预约</button></form>
+        @endif
     </section>
 @endsection

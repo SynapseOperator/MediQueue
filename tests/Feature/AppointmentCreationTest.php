@@ -197,19 +197,20 @@ class AppointmentCreationTest extends TestCase
         }
     }
 
-    public function test_expired_unreclaimed_pending_still_consumes_capacity(): void
+    public function test_on_demand_expiry_reclaims_before_new_creation_and_preserves_history(): void
     {
         $users = DB::table('users')->whereIn('username', ['demo_patient_1', 'demo_patient_2'])->orderBy('username')->pluck('id');
         $slot = DB::table('slots')->orderBy('id')->first();
         DB::table('slots')->where('id', $slot->id)->update(['capacity' => 1]);
-        app(AppointmentService::class)->create($users[0], $slot->id, 'expires');
+        $old = app(AppointmentService::class)->create($users[0], $slot->id, 'expires');
         CarbonImmutable::setTestNow(CarbonImmutable::parse('2026-11-16T20:46:00Z'));
-        try {
-            app(AppointmentService::class)->create($users[1], $slot->id, 'still-full');
-            $this->fail('Expected unreclaimed capacity to remain occupied.');
-        } catch (ValidationException $e) {
-            $this->assertArrayHasKey('slot_id', $e->errors());
-        }
+        // Merely reaching the deadline never changes occupancy. P4 performs the actual release transaction first.
+        $this->assertSame(1, DB::table('slots')->where('id', $slot->id)->value('occupied_count'));
+        $new = app(AppointmentService::class)->create($users[1], $slot->id, 'new-after-reclaim');
+        $this->assertNotSame($old, $new);
+        $this->assertDatabaseHas('appointments', ['id' => $old, 'status' => 'EXPIRED']);
+        $this->assertDatabaseHas('payment_orders', ['appointment_id' => $old, 'status' => 'CLOSED']);
+        $this->assertDatabaseHas('appointments', ['id' => $new, 'status' => 'PENDING_PAYMENT']);
         $this->assertSame(1, DB::table('slots')->where('id', $slot->id)->value('occupied_count'));
     }
 

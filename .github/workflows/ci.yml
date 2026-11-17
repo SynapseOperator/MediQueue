@@ -113,6 +113,7 @@ jobs:
           path: |
             test-results/junit.xml
             test-results/appointment-concurrency-*.json
+            test-results/lifecycle-concurrency-*.json
           if-no-files-found: warn
           retention-days: 14
 

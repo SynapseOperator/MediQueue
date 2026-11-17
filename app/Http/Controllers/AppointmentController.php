@@ -41,13 +41,14 @@ class AppointmentController extends Controller
         $appointment = DB::table('appointments')
             ->join('patients', 'patients.id', '=', 'appointments.patient_id')
             ->join('payment_orders', 'payment_orders.appointment_id', '=', 'appointments.id')
+            ->leftJoin('refunds', 'refunds.payment_order_id', '=', 'payment_orders.id')
             ->join('slots', 'slots.id', '=', 'appointments.slot_id')
             ->join('schedules', 'schedules.id', '=', 'slots.schedule_id')
             ->join('departments', 'departments.id', '=', 'schedules.department_id')
             ->join('doctors', 'doctors.id', '=', 'schedules.doctor_id')
             ->join('users as doctor_users', 'doctor_users.id', '=', 'doctors.user_id')
             ->where('patients.user_id', $request->user()->id)->where('appointments.id', $id)
-            ->select('appointments.*', 'payment_orders.order_no', 'payment_orders.status as order_status',
+            ->select('appointments.*', 'payment_orders.order_no', 'payment_orders.status as order_status', 'refunds.refund_no', 'refunds.status as refund_status', 'refunds.last_error',
                 'slots.starts_at', 'slots.ends_at', 'slots.status as slot_status', 'schedules.status as schedule_status',
                 'departments.status as department_status', 'departments.name as department_name',
                 'doctors.status as doctor_status', 'doctors.full_name as doctor_name', 'doctor_users.status as doctor_user_status')

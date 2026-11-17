@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Payments\MockWeChatGateway;
+use App\Payments\PaymentGateway;
 use Closure;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -18,7 +20,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(PaymentGateway::class, MockWeChatGateway::class);
     }
 
     /**

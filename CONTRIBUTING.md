@@ -1,10 +1,10 @@
 # 参与 MediQueue
 
-MediQueue 是使用合成数据的医院预约课程项目。当前工作范围为 P3 预约核心事务及并发；业务功能和验收以 [CODEX_START_PROMPT.md](CODEX_START_PROMPT.md) 与 [docs/spec](docs/spec/) 中的 V1.1 文件为准，阶段与合并授权遵循负责人最新决定。业务规则已冻结，改变规则或扩展范围需要项目负责人确认。
+MediQueue 是使用合成数据的医院预约课程项目。当前工作范围为 P4 模拟支付及预约生命周期；业务功能和验收以 [CODEX_START_PROMPT.md](CODEX_START_PROMPT.md) 与 [docs/spec](docs/spec/) 中的 V1.1 文件为准，阶段与合并授权遵循负责人最新决定。业务规则已冻结，改变规则或扩展范围需要项目负责人确认。
 
 ## 提交变更
 
-1. 从已验收的 `main` 创建 `feat/...` 或 `fix/...` 分支；P3 使用 `feat/p3-appointment-core`。
+1. 从已验收的 `main` 创建 `feat/...` 或 `fix/...` 分支；P4 使用 `feat/p4-mock-payment-lifecycle`。
 2. 保持修改聚焦，复用现有模式，避免无使用场景的抽象。新增功能应有对应测试。
 3. 按 README 配置本地环境，运行 Composer 校验、PHP 风格/语法检查、真实 MySQL 测试及前端构建；使用实际命令和结果填写 PR。
 4. 推送功能分支并创建 Draft PR。CI 失败应修复原因，不能删除有效检查换取通过。
