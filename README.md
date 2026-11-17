@@ -4,15 +4,25 @@
 
 单医院、多科室的医院预约挂号课程项目。采用 PHP 8.4 / Laravel 13、MySQL 8.4、Blade / Tailwind CSS / Vite。
 
-当前为 **P5 页面、统计与课程 SQL 阶段**：完成患者预约确认、模拟收银台、医生只读名单、管理员看板和审计，以及基于真实 MySQL 的统计对象。P6 综合验收与课程报告尚待完成，不用于真实医院服务。[浏览器验收与截图](docs/verification/p5-browser.md) · [统计口径与设计](docs/architecture/p5-analytics.md) · [SQL 与权限说明](docs/database/p5-sql.md) · [P4 验证记录](docs/verification/P4.md)。
+**P0–P6 计划实现与本地综合验收已完成**：三角色页面、预约和模拟支付生命周期、运营统计、课程 SQL、独立性能与恢复实验，以及可编辑课程报告。远端交付状态见 [P6 验证记录](docs/verification/P6.md) 和对应 PR。本项目不用于真实医院服务。
 
-本地全量测试最近一次为 **229 项、2871 断言、0 失败**；远端提交、CI 及合并结果见阶段 PR 的交付记录和实际 GitHub Actions 检查。
+本地全量测试最近一次为 **234 项、2939 断言、0 失败/错误/跳过**；包含真实 MySQL 独立进程竞态。AC-01–30 中29项适用要求有证据，AC-22真实支付条件项不适用；远端检查以对应提交的实际 GitHub Actions 为准。
+
+| 课程交付 | 材料 |
+|---|---|
+| 综合验收与浏览器 | [完整AC矩阵](docs/verification/p6-acceptance-matrix.md) · [桌面/390px实测](docs/verification/p6-browser.md) |
+| 数据库性能 | [5万预约实验、SQL、计划和七轮测量](docs/performance/p6-report.md) |
+| 备份恢复 | [逻辑备份、隔离恢复及一致性证据](docs/verification/p6-backup-restore.md) |
+| 报告与答辩 | [14部分Markdown报告与配图](docs/report/MediQueue-course-report.md) · [5–7分钟提纲](docs/report/defense-outline.md) |
+| 启动演示 | [Windows原生MySQL启动、健康检查与独立场景](docs/windows-demo.md) |
+
+![真实管理员看板，数据为合成演示资料](docs/verification/screenshots/p6/dashboard.jpg)
 
 本期支付路线仅为 **模拟微信支付／无实际扣款**，不接入真实商户。所有演示资料均须为合成数据。模拟开关默认关闭，仅允许显式 local/demo/testing 环境启用，production 即使开关打开也拒绝模拟付款及退款。
 
 ## 快速启动
 
-需要 PHP 8.4（含 PDO MySQL、mbstring、OpenSSL、DOM/XML、curl、fileinfo）、Composer 2、Node.js 24 / npm、Docker Compose。也可使用已有 MySQL 8.4，按 `docker/mysql/init.sh` 的权限边界自行建库。仅需一个 PHP 应用和一个 MySQL，无需 Redis 或后台队列。
+需要 PHP 8.4（含 PDO MySQL、mbstring、OpenSSL、DOM/XML、curl、fileinfo）、Composer 2、Node.js 24 / npm、MySQL 8.4。以下通用步骤使用可选的 Docker Compose；已有原生 MySQL 可按 `docker/mysql/init.sh` 的权限边界配置，当前Windows交付直接按 [启动指南](docs/windows-demo.md) 运行，无需修复Docker Desktop。仅需一个 PHP 应用和一个 MySQL，无需 Redis 或后台队列。
 
 ```sh
 git clone https://github.com/SynapseOperator/MediQueue.git
@@ -56,7 +66,7 @@ php artisan serve --host=127.0.0.1 --port=8000
 
 P2 本机测试使用独立原生 **MySQL 8.4.13 / 127.0.0.1:3308**：现有 Docker Desktop 的机器级安装注册信息缺失，当前权限无法恢复；其数据盘保留。本地三个环境文件仅将端口改为 3308，原件备份在被忽略的 `.local/mysql-p2-env-backup/`。当前原生实例使用独立数据目录，已初始化合成演示资料，未迁移或覆盖 Docker 库的数据。CI 与上方通用 Compose 启动方式保持不变。
 
-本机重启后可在 PowerShell 启动该独立实例（已有进程运行时不必重复启动）：
+本机日常启动推荐执行 `.\scripts\windows\start-demo.ps1`，同时检查数据库、Laravel和回收调度器；只核验时加 `-CheckOnly`。已实际验证MySQL与应用停止后从原目录恢复、12张表数据摘要不变；没有进行Windows整机重启。只需手动启动MySQL时可用以下命令（已有进程运行时不必重复启动）：
 
 ```powershell
 Start-Process -FilePath 'D:\Bread_coding\.tools\mediqueue\mysql\bin\mysqld.exe' -WindowStyle Hidden -ArgumentList '--no-defaults --basedir=D:/Bread_coding/.tools/mediqueue/mysql --datadir=D:/Bread_coding/.tools/mediqueue/mysql-p2-data --port=3308 --bind-address=127.0.0.1 --mysqlx=0 --log-error=D:/Bread_coding/.tools/mediqueue/mysql-p2-error.log'
@@ -80,7 +90,7 @@ php scripts/run-schema.php testing
 php scripts/run-schema.php test --log-junit test-results/junit.xml
 ```
 
-数据库测试明确要求 MySQL 8.x 和专用 `mediqueue_test`，在测试 DDL 前核验实际数据库，不能指向业务库或用 SQLite 代替。保留 P0–P4 全部有效检查；P4 新增支付/取消/回收/退款竞态、时间边界、权限、故障回滚和提交响应未知恢复验证。运行时应独占测试库，不同时启动两套 PHPUnit。单独运行并发：`php scripts/run-schema.php test --filter=ConcurrencyTest`。P3 四份 `test-results/appointment-concurrency-*.json` 与 P4 九份 `test-results/lifecycle-concurrency-*.json` 含实际 PID、MySQL 连接 ID、结果、状态和占用核对；不把顺序 HTTP 请求当并发测试。
+数据库测试明确要求 MySQL 8.x 和专用 `mediqueue_test`，在测试 DDL 前核验实际数据库，不能指向业务库或用 SQLite 代替。保留 P0–P5 全部有效检查；P6补齐取消再约、改价双快照、开始后取消边界和独立演示场景测试。运行时应独占测试库，不同时启动两套 PHPUnit。单独运行并发：`php scripts/run-schema.php test --filter=ConcurrencyTest`。P3 四份 `test-results/appointment-concurrency-*.json` 与 P4 九份 `test-results/lifecycle-concurrency-*.json` 含实际 PID、MySQL 连接 ID、结果、状态和占用核对；不把顺序 HTTP 请求当并发测试。最终本地公开证据保存在 [P6记录](docs/verification/P6.md)。
 
 [GitHub Actions](https://github.com/SynapseOperator/MediQueue/actions/workflows/ci.yml) 在 PR、main push、手动触发时执行四项必需检查：`quality`、`mysql`、`frontend`、`secrets`。使用锁定 SHA 的 actions；MySQL 服务隔离、凭据临时生成；Gitleaks 扫描全部 Git 历史并隐藏匹配值。JUnit 与 P3/P4 并发 JSON 随 `mysql-junit` artifact 保存，不上传环境文件或应用日志。
 
@@ -103,6 +113,8 @@ P1 Seeder 生成 2 科室、2 医生、3 患者、1 管理员（共 6 个账户�
 Seeder 只允许 local/testing/demo，生产环境即使 `--force` 也拒绝。十张业务表任一非空即拒绝重跑，防止覆盖历史或重置占用；失败整体回滚。不要用清空已有业务数据的方式重复播种。
 
 ## 演示登录与角色入口
+
+日常答辩建议 `php artisan mediqueue:demo-scenario <新前缀>`：仅local/demo交互运行，隐藏输入新管理员和医生密码，原子新增独立虚构资源及历史预约，保留旧账号和历史，不重置任何既有密码。按 [Windows演示步骤](docs/windows-demo.md) 完成患者注册、付款、退款失败重试、停诊和人工完成。相同前缀拒绝重复使用。
 
 初次使用可在交互终端为已有演示账号设置密码。命令仅允许 local/demo/testing，输入隐藏且需要确认，不接受密码参数、不打印密码，不清空业务数据；重置密码会使旧会话失效。
 
@@ -159,4 +171,4 @@ php artisan mediqueue:expire-appointments --limit=100
 - [数据库设计 V1.1](docs/spec/MediQueue_Database_Design_V1.1.md)
 - [模拟微信支付设计 V1.1](docs/spec/MediQueue_Mock_WeChat_Payment_Design_V1.1.md)
 
-遵循 [贡献指南](CONTRIBUTING.md) 与 [安全报告流程](SECURITY.md)，采用 [MIT License](LICENSE)。下一阶段 P6 完成综合验收、备份恢复及课程报告；真实支付不在本项目范围。老师是否接受模拟支付作为课程“在线挂号支付”仍属外部验收事项。
+遵循 [贡献指南](CONTRIBUTING.md) 与 [安全报告流程](SECURITY.md)，采用 [MIT License](LICENSE)。P6为最后计划阶段，后续按教师模板整理和现场答辩反馈修订；真实支付不在本项目范围。老师是否接受模拟支付作为课程“在线挂号支付”仍属外部验收事项。

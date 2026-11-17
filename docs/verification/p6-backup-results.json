@@ -1,0 +1,210 @@
+{
+    "captured_at_utc": "2026-11-17T10:18:57+00:00",
+    "source": "mediqueue",
+    "target": "mediqueue_restore_p6_20261117_verified",
+    "version": "8.4.13",
+    "commands": {
+        "dump-schema": {
+            "exit_code": 0,
+            "seconds": 0.087072
+        },
+        "dump-data": {
+            "exit_code": 0,
+            "seconds": 0.065808
+        },
+        "restore-schema": {
+            "exit_code": 0,
+            "seconds": 0.318114
+        },
+        "restore-data": {
+            "exit_code": 0,
+            "seconds": 0.059522
+        }
+    },
+    "files": {
+        "schema.sql": {
+            "bytes": 29378,
+            "sha256": "c9b728c938f8e2ab17be8b1d61547f7fd85b539cb3791fe2614c61544a1b365e"
+        },
+        "data.sql": {
+            "bytes": 23523,
+            "sha256": "87252560c915c79168895f02cbce8888e3756da786e3fb1d4a15cb61a93bb74b"
+        },
+        "restore-schema.sql": {
+            "bytes": 29378,
+            "sha256": "c9b728c938f8e2ab17be8b1d61547f7fd85b539cb3791fe2614c61544a1b365e"
+        }
+    },
+    "tables_before_smoke": {
+        "users": {
+            "rows": 17,
+            "sha256": "c9765a7b5970e500291bf88a88988e3b2466ee205f44186dc4c24488072c8ad8"
+        },
+        "patients": {
+            "rows": 10,
+            "sha256": "f095decfae04a0f8769cece553e11edbdf57e6885d283998ae417d9768352ac0"
+        },
+        "departments": {
+            "rows": 4,
+            "sha256": "dbaeac86002cef7f0191741ca8fa0623928b74ea7fb8569254f13518d7a962d4"
+        },
+        "doctors": {
+            "rows": 4,
+            "sha256": "3f053d3e075b7ead41f88dd629f0c4d82aac647948ec2ddfe8ac5801ca3e0580"
+        },
+        "schedules": {
+            "rows": 6,
+            "sha256": "564a5cc553fdb7cc61d37fa481f8b04502cd30a9f1d82150c98d5cef1cb95cc6"
+        },
+        "slots": {
+            "rows": 8,
+            "sha256": "5c772d729b50c1fc1768037d9d24ef966e3c3c666d8b8fb4b110305b31f7f54a"
+        },
+        "appointments": {
+            "rows": 8,
+            "sha256": "cbcf0d75bb2bf9160a78deb88f4fb44018366f0678da12bcee80d8e08d481f24"
+        },
+        "payment_orders": {
+            "rows": 8,
+            "sha256": "b1e4f1135d3e6d98d38d9a72893b1c9d112f1f1d9a6d8b59301d2af86c711060"
+        },
+        "refunds": {
+            "rows": 5,
+            "sha256": "ffc42f591f6bf3716126a0d19c429ceb465f06baaf3ee02c7bb90814dba3adde"
+        },
+        "audit_logs": {
+            "rows": 40,
+            "sha256": "fd25326779b690aded00d0e630e2f9019ce01cb9c04b3a4b37502c2dfafbc41d"
+        },
+        "sessions": {
+            "rows": 1,
+            "sha256": "7397120b214e90c62efa050ab8747e8e777a5543651d8894d09d6f9fdde48499"
+        },
+        "migrations": {
+            "rows": 12,
+            "sha256": "403fed118aa7746aa993f9497de4ff77f5fc18779017d201c8f3aaaac88eae3d"
+        }
+    },
+    "source_unchanged_during_backup": true,
+    "all_row_fingerprints_equal": true,
+    "constraints_equal": true,
+    "constraint_counts": {
+        "UNIQUE": 14,
+        "CHECK": 33,
+        "FOREIGN KEY": 15,
+        "PRIMARY KEY": 12
+    },
+    "tables_and_views": [
+        {
+            "TABLE_NAME": "appointments",
+            "TABLE_TYPE": "BASE TABLE"
+        },
+        {
+            "TABLE_NAME": "audit_logs",
+            "TABLE_TYPE": "BASE TABLE"
+        },
+        {
+            "TABLE_NAME": "departments",
+            "TABLE_TYPE": "BASE TABLE"
+        },
+        {
+            "TABLE_NAME": "doctors",
+            "TABLE_TYPE": "BASE TABLE"
+        },
+        {
+            "TABLE_NAME": "migrations",
+            "TABLE_TYPE": "BASE TABLE"
+        },
+        {
+            "TABLE_NAME": "patients",
+            "TABLE_TYPE": "BASE TABLE"
+        },
+        {
+            "TABLE_NAME": "payment_orders",
+            "TABLE_TYPE": "BASE TABLE"
+        },
+        {
+            "TABLE_NAME": "refunds",
+            "TABLE_TYPE": "BASE TABLE"
+        },
+        {
+            "TABLE_NAME": "schedules",
+            "TABLE_TYPE": "BASE TABLE"
+        },
+        {
+            "TABLE_NAME": "sessions",
+            "TABLE_TYPE": "BASE TABLE"
+        },
+        {
+            "TABLE_NAME": "slots",
+            "TABLE_TYPE": "BASE TABLE"
+        },
+        {
+            "TABLE_NAME": "users",
+            "TABLE_TYPE": "BASE TABLE"
+        },
+        {
+            "TABLE_NAME": "v_appointment_details",
+            "TABLE_TYPE": "VIEW"
+        },
+        {
+            "TABLE_NAME": "v_slot_occupancy_check",
+            "TABLE_TYPE": "VIEW"
+        }
+    ],
+    "routines": [
+        {
+            "ROUTINE_NAME": "fn_intervals_overlap",
+            "ROUTINE_TYPE": "FUNCTION",
+            "SECURITY_TYPE": "INVOKER"
+        },
+        {
+            "ROUTINE_NAME": "sp_department_statistics",
+            "ROUTINE_TYPE": "PROCEDURE",
+            "SECURITY_TYPE": "INVOKER"
+        }
+    ],
+    "foreign_key_orphans": {
+        "appointments.cancelled_by": 0,
+        "appointments.completed_by": 0,
+        "appointments.patient_id": 0,
+        "appointments.slot_id": 0,
+        "audit_logs.operator_id": 0,
+        "doctors.department_id": 0,
+        "doctors.user_id": 0,
+        "patients.user_id": 0,
+        "payment_orders.appointment_id": 0,
+        "refunds.payment_order_id": 0,
+        "refunds.requested_by": 0,
+        "schedules.created_by": 0,
+        "schedules.department_id": 0,
+        "schedules.doctor_id": 0,
+        "slots.schedule_id": 0
+    },
+    "integrity": {
+        "occupancy_mismatches": 0,
+        "missing_orders": 0,
+        "order_amount_mismatches": 0,
+        "refund_amount_mismatches": 0
+    },
+    "read_smoke": {
+        "view_rows": 8,
+        "adjacent_overlap": 0,
+        "department_rows": 4
+    },
+    "write_smoke": {
+        "database": "mediqueue_restore_p6_20261117_verified",
+        "appointment_id": 9,
+        "states": [
+            "CONFIRMED",
+            "CANCELLED",
+            "FAILED",
+            "SUCCEEDED"
+        ],
+        "order_status": "REFUNDED",
+        "occupancy_mismatches": 0
+    },
+    "source_unchanged_after_restore_smoke": true,
+    "status": "passed",
+    "private_backup_directory": ".local\/backups\/20261117_verified"
+}

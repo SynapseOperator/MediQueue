@@ -1,0 +1,278 @@
+{
+    "scenario": "last-seat",
+    "database": "mediqueue_test",
+    "isolation": "READ-COMMITTED",
+    "participants": 20,
+    "workers": [
+        {
+            "phase": "result",
+            "outcome": "rejected",
+            "fields": [
+                "slot_id"
+            ],
+            "pid": 6744,
+            "connection_id": 27,
+            "operation": "appointment",
+            "user_id": 136,
+            "slot_id": 90
+        },
+        {
+            "phase": "result",
+            "outcome": "rejected",
+            "fields": [
+                "slot_id"
+            ],
+            "pid": 55748,
+            "connection_id": 28,
+            "operation": "appointment",
+            "user_id": 137,
+            "slot_id": 90
+        },
+        {
+            "phase": "result",
+            "outcome": "rejected",
+            "fields": [
+                "slot_id"
+            ],
+            "pid": 18592,
+            "connection_id": 29,
+            "operation": "appointment",
+            "user_id": 138,
+            "slot_id": 90
+        },
+        {
+            "phase": "result",
+            "outcome": "rejected",
+            "fields": [
+                "slot_id"
+            ],
+            "pid": 59468,
+            "connection_id": 30,
+            "operation": "appointment",
+            "user_id": 139,
+            "slot_id": 90
+        },
+        {
+            "phase": "result",
+            "outcome": "rejected",
+            "fields": [
+                "slot_id"
+            ],
+            "pid": 16648,
+            "connection_id": 31,
+            "operation": "appointment",
+            "user_id": 140,
+            "slot_id": 90
+        },
+        {
+            "phase": "result",
+            "outcome": "rejected",
+            "fields": [
+                "slot_id"
+            ],
+            "pid": 32916,
+            "connection_id": 32,
+            "operation": "appointment",
+            "user_id": 141,
+            "slot_id": 90
+        },
+        {
+            "phase": "result",
+            "outcome": "rejected",
+            "fields": [
+                "slot_id"
+            ],
+            "pid": 47744,
+            "connection_id": 33,
+            "operation": "appointment",
+            "user_id": 142,
+            "slot_id": 90
+        },
+        {
+            "phase": "result",
+            "outcome": "rejected",
+            "fields": [
+                "slot_id"
+            ],
+            "pid": 10892,
+            "connection_id": 34,
+            "operation": "appointment",
+            "user_id": 143,
+            "slot_id": 90
+        },
+        {
+            "phase": "result",
+            "outcome": "rejected",
+            "fields": [
+                "slot_id"
+            ],
+            "pid": 34928,
+            "connection_id": 35,
+            "operation": "appointment",
+            "user_id": 144,
+            "slot_id": 90
+        },
+        {
+            "phase": "result",
+            "outcome": "rejected",
+            "fields": [
+                "slot_id"
+            ],
+            "pid": 56072,
+            "connection_id": 36,
+            "operation": "appointment",
+            "user_id": 145,
+            "slot_id": 90
+        },
+        {
+            "phase": "result",
+            "outcome": "rejected",
+            "fields": [
+                "slot_id"
+            ],
+            "pid": 5584,
+            "connection_id": 37,
+            "operation": "appointment",
+            "user_id": 146,
+            "slot_id": 90
+        },
+        {
+            "phase": "result",
+            "outcome": "rejected",
+            "fields": [
+                "slot_id"
+            ],
+            "pid": 21960,
+            "connection_id": 38,
+            "operation": "appointment",
+            "user_id": 147,
+            "slot_id": 90
+        },
+        {
+            "phase": "result",
+            "outcome": "rejected",
+            "fields": [
+                "slot_id"
+            ],
+            "pid": 48368,
+            "connection_id": 39,
+            "operation": "appointment",
+            "user_id": 148,
+            "slot_id": 90
+        },
+        {
+            "phase": "result",
+            "outcome": "rejected",
+            "fields": [
+                "slot_id"
+            ],
+            "pid": 14880,
+            "connection_id": 40,
+            "operation": "appointment",
+            "user_id": 149,
+            "slot_id": 90
+        },
+        {
+            "phase": "result",
+            "outcome": "created",
+            "appointment_id": 28,
+            "pid": 53380,
+            "connection_id": 41,
+            "operation": "appointment",
+            "user_id": 150,
+            "slot_id": 90
+        },
+        {
+            "phase": "result",
+            "outcome": "rejected",
+            "fields": [
+                "slot_id"
+            ],
+            "pid": 43988,
+            "connection_id": 42,
+            "operation": "appointment",
+            "user_id": 151,
+            "slot_id": 90
+        },
+        {
+            "phase": "result",
+            "outcome": "rejected",
+            "fields": [
+                "slot_id"
+            ],
+            "pid": 10424,
+            "connection_id": 43,
+            "operation": "appointment",
+            "user_id": 152,
+            "slot_id": 90
+        },
+        {
+            "phase": "result",
+            "outcome": "rejected",
+            "fields": [
+                "slot_id"
+            ],
+            "pid": 49244,
+            "connection_id": 44,
+            "operation": "appointment",
+            "user_id": 153,
+            "slot_id": 90
+        },
+        {
+            "phase": "result",
+            "outcome": "rejected",
+            "fields": [
+                "slot_id"
+            ],
+            "pid": 27424,
+            "connection_id": 45,
+            "operation": "appointment",
+            "user_id": 154,
+            "slot_id": 90
+        },
+        {
+            "phase": "result",
+            "outcome": "rejected",
+            "fields": [
+                "slot_id"
+            ],
+            "pid": 23716,
+            "connection_id": 46,
+            "operation": "appointment",
+            "user_id": 155,
+            "slot_id": 90
+        }
+    ],
+    "final_state": {
+        "appointments": 1,
+        "payment_orders": 1,
+        "appointment_audits": 1,
+        "management_audits": 0,
+        "slots": [
+            {
+                "id": 90,
+                "capacity": 1,
+                "occupied_count": 1,
+                "actual": 1
+            },
+            {
+                "id": 91,
+                "capacity": 2,
+                "occupied_count": 0,
+                "actual": 0
+            },
+            {
+                "id": 92,
+                "capacity": 3,
+                "occupied_count": 0,
+                "actual": 0
+            },
+            {
+                "id": 93,
+                "capacity": 2,
+                "occupied_count": 0,
+                "actual": 0
+            }
+        ]
+    }
+}

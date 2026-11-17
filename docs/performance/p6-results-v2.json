@@ -1,0 +1,175 @@
+{
+    "version": "8.4.13",
+    "schema": "mediqueue_perf_p6_v2",
+    "checks": {
+        "appointments": 50000,
+        "orders": 50000,
+        "mismatches": 0,
+        "invalid_rows": 0,
+        "overlapping_patient_intervals": 0,
+        "invalid_hashes": 0,
+        "foreign_key_checks": 1
+    },
+    "rows": 50000,
+    "description": "100 synthetic patients with 500 non-overlapping appointments each, 1000 one-minute slots, 50 expired-unreclaimed pending appointments per slot; all orders UNPAID.",
+    "settings": {
+        "innodb_buffer_pool_size": 134217728,
+        "innodb_flush_log_at_trx_commit": 1,
+        "transaction_isolation": "REPEATABLE-READ",
+        "log_bin": 1
+    },
+    "experiments": {
+        "expiry": {
+            "normal": {
+                "sql": "SELECT id FROM appointments WHERE status='PENDING_PAYMENT' AND expires_at <= '2026-11-16 16:16:00' ORDER BY expires_at,id LIMIT 100",
+                "milliseconds": [
+                    0.3615,
+                    0.2641,
+                    0.3145,
+                    0.2267,
+                    0.2173,
+                    0.4187,
+                    0.313
+                ],
+                "median_ms": 0.313,
+                "result_sha256": "5653fe90261a67ae9c5c18e5c49941b85eafeb43425b9545d5e3c31e94e3ef4b",
+                "rows_returned": 100,
+                "explain_analyze": [
+                    "-> Limit: 100 row(s)  (cost=5067 rows=100) (actual time=0.0257..0.0398 rows=100 loops=1)\n    -> Filter: ((appointments.`status` = 'PENDING_PAYMENT') and (appointments.expires_at <= TIMESTAMP'2026-11-16 16:16:00'))  (cost=5067 rows=24876) (actual time=0.0252..0.0364 rows=100 loops=1)\n        -> Covering index range scan on appointments using appointments_status_expires_at_id_index over (status = 'PENDING_PAYMENT' AND expires_at <= '2026-11-16 16:16:00.000')  (cost=5067 rows=24876) (actual time=0.0243..0.0294 rows=100 loops=1)\n"
+                ]
+            },
+            "ignore_index": {
+                "sql": "SELECT id FROM appointments IGNORE INDEX (`appointments_status_expires_at_id_index`) WHERE status='PENDING_PAYMENT' AND expires_at <= '2026-11-16 16:16:00' ORDER BY expires_at,id LIMIT 100",
+                "milliseconds": [
+                    8.8567,
+                    8.8526,
+                    10.366,
+                    10.1298,
+                    9.0878,
+                    9.0794,
+                    9.0846
+                ],
+                "median_ms": 9.0846,
+                "result_sha256": "5653fe90261a67ae9c5c18e5c49941b85eafeb43425b9545d5e3c31e94e3ef4b",
+                "rows_returned": 100,
+                "explain_analyze": [
+                    "-> Limit: 100 row(s)  (cost=5079 rows=100) (actual time=11.4..11.4 rows=100 loops=1)\n    -> Sort: appointments.expires_at, appointments.id, limit input to 100 row(s) per chunk  (cost=5079 rows=49752) (actual time=11.4..11.4 rows=100 loops=1)\n        -> Filter: ((appointments.`status` = 'PENDING_PAYMENT') and (appointments.expires_at <= TIMESTAMP'2026-11-16 16:16:00'))  (cost=5079 rows=49752) (actual time=0.0195..7.78 rows=50000 loops=1)\n            -> Covering index scan on appointments using appointments_slot_id_status_expires_at_id_index  (cost=5079 rows=49752) (actual time=0.0185..4.64 rows=50000 loops=1)\n"
+                ]
+            }
+        },
+        "patient_history": {
+            "normal": {
+                "sql": "SELECT id,created_at FROM appointments WHERE patient_id=42 ORDER BY created_at DESC,id DESC LIMIT 20",
+                "milliseconds": [
+                    0.2977,
+                    0.2918,
+                    0.3785,
+                    0.2436,
+                    0.3321,
+                    0.179,
+                    0.1597
+                ],
+                "median_ms": 0.2918,
+                "result_sha256": "a821010e1320e717f4de5642c1e1013707352c7402f2fe2ec93e1b24694f8d59",
+                "rows_returned": 20,
+                "explain_analyze": [
+                    "-> Limit: 20 row(s)  (cost=50.7 rows=20) (actual time=0.007..0.0089 rows=20 loops=1)\n    -> Covering index lookup on appointments using appointments_patient_id_created_at_id_index (patient_id=42) (reverse)  (cost=50.7 rows=500) (actual time=0.0067..0.0078 rows=20 loops=1)\n"
+                ]
+            },
+            "ignore_index": {
+                "sql": "SELECT id,created_at FROM appointments IGNORE INDEX (`appointments_patient_id_created_at_id_index`) WHERE patient_id=42 ORDER BY created_at DESC,id DESC LIMIT 20",
+                "milliseconds": [
+                    0.747,
+                    0.7091,
+                    0.7454,
+                    0.721,
+                    0.6362,
+                    0.6193,
+                    0.6277
+                ],
+                "median_ms": 0.7091,
+                "result_sha256": "a821010e1320e717f4de5642c1e1013707352c7402f2fe2ec93e1b24694f8d59",
+                "rows_returned": 20,
+                "explain_analyze": [
+                    "-> Limit: 20 row(s)  (cost=175 rows=20) (actual time=0.468..0.469 rows=20 loops=1)\n    -> Sort: appointments.created_at DESC, appointments.id DESC, limit input to 20 row(s) per chunk  (cost=175 rows=500) (actual time=0.468..0.468 rows=20 loops=1)\n        -> Index lookup on appointments using appointments_patient_id_request_key_unique (patient_id=42)  (cost=175 rows=500) (actual time=0.0389..0.402 rows=500 loops=1)\n"
+                ]
+            }
+        },
+        "occupancy": {
+            "normal": {
+                "sql": "SELECT sl.id,sl.occupied_count,COUNT(a.id) AS actual FROM slots sl LEFT JOIN appointments a ON a.slot_id=sl.id AND a.status IN ('PENDING_PAYMENT','CONFIRMED','COMPLETED') GROUP BY sl.id,sl.occupied_count ORDER BY sl.id",
+                "milliseconds": [
+                    16.7816,
+                    15.9117,
+                    17.7,
+                    15.0293,
+                    17.8979,
+                    15.4324,
+                    15.8097
+                ],
+                "median_ms": 15.9117,
+                "result_sha256": "ec997c1b41951a028d0da9e83b63da9586122e3f07b1b45f8331bbc369c97cae",
+                "rows_returned": 1000,
+                "explain_analyze": [
+                    "-> Sort: sl.id, sl.occupied_count  (actual time=20.5..20.5 rows=1000 loops=1)\n    -> Table scan on <temporary>  (actual time=20.3..20.4 rows=1000 loops=1)\n        -> Aggregate using temporary table  (actual time=20.3..20.3 rows=1000 loops=1)\n            -> Nested loop left join  (cost=5517 rows=49752) (actual time=0.0203..12.8 rows=50000 loops=1)\n                -> Table scan on sl  (cost=102 rows=1000) (actual time=0.0125..0.155 rows=1000 loops=1)\n                -> Filter: (a.`status` in ('PENDING_PAYMENT','CONFIRMED','COMPLETED'))  (cost=0.445 rows=49.8) (actual time=0.00158..0.0109 rows=50 loops=1000)\n                    -> Covering index lookup on a using appointments_slot_id_status_expires_at_id_index (slot_id=sl.id)  (cost=0.445 rows=49.8) (actual time=0.00149..0.0079 rows=50 loops=1000)\n"
+                ]
+            },
+            "ignore_index": {
+                "sql": "SELECT sl.id,sl.occupied_count,COUNT(a.id) AS actual FROM slots sl LEFT JOIN appointments a IGNORE INDEX (`appointments_slot_id_status_expires_at_id_index`) ON a.slot_id=sl.id AND a.status IN ('PENDING_PAYMENT','CONFIRMED','COMPLETED') GROUP BY sl.id,sl.occupied_count ORDER BY sl.id",
+                "milliseconds": [
+                    110.8925,
+                    107.8778,
+                    103.6198,
+                    112.6464,
+                    117.727,
+                    109.1636,
+                    114.2976
+                ],
+                "median_ms": 110.8925,
+                "result_sha256": "ec997c1b41951a028d0da9e83b63da9586122e3f07b1b45f8331bbc369c97cae",
+                "rows_returned": 1000,
+                "explain_analyze": [
+                    "-> Sort: sl.id, sl.occupied_count  (actual time=91.8..91.9 rows=1000 loops=1)\n    -> Table scan on <temporary>  (actual time=91.6..91.7 rows=1000 loops=1)\n        -> Aggregate using temporary table  (actual time=91.6..91.6 rows=1000 loops=1)\n            -> Left hash join (a.slot_id = sl.id)  (cost=4.98e+6 rows=49.8e+6) (actual time=46.5..84.2 rows=50000 loops=1)\n                -> Table scan on sl  (cost=102 rows=1000) (actual time=0.0181..0.116 rows=1000 loops=1)\n                -> Hash\n                    -> Filter: (a.`status` in ('PENDING_PAYMENT','CONFIRMED','COMPLETED'))  (cost=5.08 rows=49752) (actual time=0.0263..8.16 rows=50000 loops=1)\n                        -> Covering index scan on a using appointments_patient_id_status_slot_id_index  (cost=5.08 rows=49752) (actual time=0.025..5.1 rows=50000 loops=1)\n"
+                ]
+            }
+        },
+        "patient_page": {
+            "normal": {
+                "sql": "SELECT a.id,a.appointment_no,a.status,a.created_at,a.fee_amount,d.full_name AS doctor_name,dep.name AS department_name,sl.starts_at,sl.ends_at,o.status AS order_status,r.status AS refund_status FROM appointments a JOIN patients p ON p.id=a.patient_id JOIN slots sl ON sl.id=a.slot_id JOIN schedules sc ON sc.id=sl.schedule_id JOIN doctors d ON d.id=sc.doctor_id JOIN departments dep ON dep.id=sc.department_id JOIN payment_orders o ON o.appointment_id=a.id LEFT JOIN refunds r ON r.payment_order_id=o.id WHERE p.user_id=44 ORDER BY a.id DESC LIMIT 20",
+                "milliseconds": [
+                    2.8819,
+                    2.4931,
+                    2.6328,
+                    2.4467,
+                    2.3922,
+                    2.3931,
+                    2.4345
+                ],
+                "median_ms": 2.4467,
+                "result_sha256": "009e84c3043bce6f92a24999c18b6c242c83037b60ab25549ffe53aec3fdd9d5",
+                "rows_returned": 20,
+                "explain_analyze": [
+                    "-> Limit: 20 row(s)  (actual time=2.38..2.39 rows=20 loops=1)\n    -> Sort: a.id DESC, limit input to 20 row(s) per chunk  (actual time=2.38..2.38 rows=20 loops=1)\n        -> Stream results  (cost=50.7 rows=500) (actual time=0.519..2.32 rows=500 loops=1)\n            -> Left hash join (r.payment_order_id = o.id)  (cost=50.7 rows=500) (actual time=0.516..2.11 rows=500 loops=1)\n                -> Nested loop inner join  (cost=676 rows=500) (actual time=0.512..2.05 rows=500 loops=1)\n                    -> Nested loop inner join  (cost=501 rows=500) (actual time=0.509..1.18 rows=500 loops=1)\n                        -> Nested loop inner join  (cost=326 rows=500) (actual time=0.506..0.7 rows=500 loops=1)\n                            -> Nested loop inner join  (cost=276 rows=500) (actual time=0.505..0.617 rows=500 loops=1)\n                                -> Inner hash join (no condition)  (cost=225 rows=500) (actual time=0.502..0.527 rows=500 loops=1)\n                                    -> Table scan on sc  (cost=980e-6 rows=1) (actual time=0.0022..0.003 rows=1 loops=1)\n                                    -> Hash\n                                        -> Index lookup on a using appointments_patient_id_request_key_unique (patient_id='42')  (cost=175 rows=500) (actual time=0.0482..0.463 rows=500 loops=1)\n                                -> Single-row index lookup on d using PRIMARY (id=sc.doctor_id)  (cost=700e-6 rows=1) (actual time=74.8e-6..91.8e-6 rows=1 loops=500)\n                            -> Single-row index lookup on dep using PRIMARY (id=sc.department_id)  (cost=700e-6 rows=1) (actual time=61e-6..77.2e-6 rows=1 loops=500)\n                        -> Filter: (sl.schedule_id = sc.id)  (cost=0.25 rows=1) (actual time=836e-6..883e-6 rows=1 loops=500)\n                            -> Single-row index lookup on sl using PRIMARY (id=a.slot_id)  (cost=0.25 rows=1) (actual time=751e-6..767e-6 rows=1 loops=500)\n                    -> Single-row index lookup on o using payment_orders_appointment_id_unique (appointment_id=a.id)  (cost=0.25 rows=1) (actual time=0.00162..0.00163 rows=1 loops=500)\n                -> Hash\n                    -> Table scan on r  (cost=0.00165 rows=1) (actual time=0.0013..0.0013 rows=0 loops=1)\n"
+                ]
+            },
+            "ignore_index": {
+                "sql": "SELECT a.id,a.appointment_no,a.status,a.created_at,a.fee_amount,d.full_name AS doctor_name,dep.name AS department_name,sl.starts_at,sl.ends_at,o.status AS order_status,r.status AS refund_status FROM appointments a IGNORE INDEX (`appointments_patient_id_created_at_id_index`) JOIN patients p ON p.id=a.patient_id JOIN slots sl ON sl.id=a.slot_id JOIN schedules sc ON sc.id=sl.schedule_id JOIN doctors d ON d.id=sc.doctor_id JOIN departments dep ON dep.id=sc.department_id JOIN payment_orders o ON o.appointment_id=a.id LEFT JOIN refunds r ON r.payment_order_id=o.id WHERE p.user_id=44 ORDER BY a.id DESC LIMIT 20",
+                "milliseconds": [
+                    2.4936,
+                    2.4713,
+                    2.4201,
+                    2.4667,
+                    2.501,
+                    2.355,
+                    2.6083
+                ],
+                "median_ms": 2.4713,
+                "result_sha256": "009e84c3043bce6f92a24999c18b6c242c83037b60ab25549ffe53aec3fdd9d5",
+                "rows_returned": 20,
+                "explain_analyze": [
+                    "-> Limit: 20 row(s)  (actual time=2.38..2.38 rows=20 loops=1)\n    -> Sort: a.id DESC, limit input to 20 row(s) per chunk  (actual time=2.38..2.38 rows=20 loops=1)\n        -> Stream results  (cost=50.7 rows=500) (actual time=0.496..2.32 rows=500 loops=1)\n            -> Left hash join (r.payment_order_id = o.id)  (cost=50.7 rows=500) (actual time=0.493..2.1 rows=500 loops=1)\n                -> Nested loop inner join  (cost=676 rows=500) (actual time=0.488..2.04 rows=500 loops=1)\n                    -> Nested loop inner join  (cost=501 rows=500) (actual time=0.485..1.18 rows=500 loops=1)\n                        -> Nested loop inner join  (cost=326 rows=500) (actual time=0.482..0.673 rows=500 loops=1)\n                            -> Nested loop inner join  (cost=276 rows=500) (actual time=0.481..0.591 rows=500 loops=1)\n                                -> Inner hash join (no condition)  (cost=225 rows=500) (actual time=0.479..0.503 rows=500 loops=1)\n                                    -> Table scan on sc  (cost=980e-6 rows=1) (actual time=0.0023..0.0034 rows=1 loops=1)\n                                    -> Hash\n                                        -> Index lookup on a using appointments_patient_id_request_key_unique (patient_id='42')  (cost=175 rows=500) (actual time=0.0501..0.44 rows=500 loops=1)\n                                -> Single-row index lookup on d using PRIMARY (id=sc.doctor_id)  (cost=700e-6 rows=1) (actual time=73.4e-6..94e-6 rows=1 loops=500)\n                            -> Single-row index lookup on dep using PRIMARY (id=sc.department_id)  (cost=700e-6 rows=1) (actual time=62.4e-6..78.2e-6 rows=1 loops=500)\n                        -> Filter: (sl.schedule_id = sc.id)  (cost=0.25 rows=1) (actual time=873e-6..921e-6 rows=1 loops=500)\n                            -> Single-row index lookup on sl using PRIMARY (id=a.slot_id)  (cost=0.25 rows=1) (actual time=792e-6..805e-6 rows=1 loops=500)\n                    -> Single-row index lookup on o using payment_orders_appointment_id_unique (appointment_id=a.id)  (cost=0.25 rows=1) (actual time=0.00163..0.00165 rows=1 loops=500)\n                -> Hash\n                    -> Table scan on r  (cost=0.00165 rows=1) (actual time=0.0012..0.0012 rows=0 loops=1)\n"
+                ]
+            }
+        }
+    }
+}

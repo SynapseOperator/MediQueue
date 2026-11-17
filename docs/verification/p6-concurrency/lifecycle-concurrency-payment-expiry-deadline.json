@@ -1,0 +1,75 @@
+{
+    "scenario": "payment-expiry-deadline",
+    "database": "mediqueue_test",
+    "isolation": "READ-COMMITTED",
+    "clock_mode": "Explicit controlled UTC time in each testing process; no production deadline change.",
+    "participants": 2,
+    "workers": [
+        {
+            "phase": "result",
+            "outcome": "returned",
+            "result": "EXPIRED",
+            "pid": 46680,
+            "connection_id": 244,
+            "operation": "pay",
+            "appointment_id": 158,
+            "test_now": "2026-11-16 20:45:00.123"
+        },
+        {
+            "phase": "result",
+            "outcome": "returned",
+            "result": false,
+            "pid": 3648,
+            "connection_id": 245,
+            "operation": "expire",
+            "appointment_id": 158,
+            "test_now": "2026-11-16 20:45:00.123"
+        }
+    ],
+    "final_state": {
+        "appointment_status": "EXPIRED",
+        "order_status": "CLOSED",
+        "refund_status": null,
+        "refund_count": 0,
+        "amount": "12.34",
+        "expires_at": "2026-11-16 20:45:00.123",
+        "paid_at": null,
+        "released_at": "2026-11-16 20:45:00.123",
+        "audits": [
+            {
+                "action": "APPOINTMENT_CREATED",
+                "count": 1
+            },
+            {
+                "action": "APPOINTMENT_EXPIRED",
+                "count": 1
+            }
+        ],
+        "slots": [
+            {
+                "id": 809,
+                "capacity": 3,
+                "occupied_count": 0,
+                "actual": 0
+            },
+            {
+                "id": 810,
+                "capacity": 2,
+                "occupied_count": 0,
+                "actual": 0
+            },
+            {
+                "id": 811,
+                "capacity": 3,
+                "occupied_count": 0,
+                "actual": 0
+            },
+            {
+                "id": 812,
+                "capacity": 2,
+                "occupied_count": 0,
+                "actual": 0
+            }
+        ]
+    }
+}

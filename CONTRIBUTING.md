@@ -1,10 +1,10 @@
 # 参与 MediQueue
 
-MediQueue 是使用合成数据的医院预约课程项目。当前工作范围为 P5 页面、统计与课程 SQL；下一阶段为 P6 综合验收与报告；业务功能和验收以 [CODEX_START_PROMPT.md](CODEX_START_PROMPT.md) 与 [docs/spec](docs/spec/) 中的 V1.1 文件为准，阶段与合并授权遵循负责人最新决定。业务规则已冻结，改变规则或扩展范围需要项目负责人确认。
+MediQueue 是使用合成数据的医院预约课程项目，已完成P0–P6计划实现与本地验证。最终证据见 [P6交付](docs/verification/P6.md)；业务功能和验收以 [CODEX_START_PROMPT.md](CODEX_START_PROMPT.md) 与 [docs/spec](docs/spec/) 中的 V1.1 文件为准，阶段与合并授权遵循负责人最新决定。业务规则已冻结，改变规则或扩展范围需要项目负责人确认。
 
 ## 提交变更
 
-1. 从已验收的 `main` 创建 `feat/...` 或 `fix/...` 分支；P5 使用 `feat/p5-ui-analytics-sql`。
+1. 从已验收的 `main` 创建 `feat/...` 或 `fix/...` 分支；P6 使用 `feat/p6-final-validation`。
 2. 保持修改聚焦，复用现有模式，避免无使用场景的抽象。新增功能应有对应测试。
 3. 按 README 配置本地环境，运行 Composer 校验、PHP 风格/语法检查、真实 MySQL 测试及前端构建；使用实际命令和结果填写 PR。
 4. 推送功能分支并创建 Draft PR。CI 失败应修复原因，不能删除有效检查换取通过。
