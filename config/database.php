@@ -1,8 +1,16 @@
 <?php
 
+$routine = PHP_SAPI === 'cli' && env('MEDIQUEUE_SCHEMA_RUNNER') === '1'
+    ? ['routine_ddl' => [
+        'driver' => 'mysql', 'host' => env('DB_HOST', '127.0.0.1'), 'port' => env('DB_PORT', '3307'),
+        'database' => env('DB_DATABASE', 'mediqueue'), 'username' => 'root',
+        'password' => env('DB_ROUTINE_ADMIN_PASSWORD'), 'charset' => 'utf8mb4', 'prefix' => '',
+        'timezone' => '+00:00',
+    ]] : [];
+
 return [
     'default' => env('DB_CONNECTION', 'mysql'),
-    'connections' => [
+    'connections' => $routine + [
         'mysql' => [
             'driver' => 'mysql',
             'url' => env('DB_URL'),

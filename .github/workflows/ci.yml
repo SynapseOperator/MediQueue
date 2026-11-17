@@ -89,16 +89,18 @@ jobs:
           export MYSQL_HOST=127.0.0.1 MYSQL_PORT=3306
           bash docker/mysql/init.sh
       - name: Migrate with the dedicated schema account
-        run: php artisan migrate --env=migration --force
+        run: |
+          php scripts/run-schema.php migrate
+          php scripts/run-schema.php grant
       - name: Seed synthetic demo data with the runtime account
         run: php artisan db:seed --force
       - name: Verify test database migration and rollback
         run: |
-          php artisan migrate --env=testing --force
-          php artisan migrate:rollback --env=testing --force
-          php artisan migrate --env=testing --force
+          php scripts/run-schema.php testing
+          php scripts/run-schema.php rollback-testing
+          php scripts/run-schema.php testing
       - name: Run tests against real MySQL
-        run: php artisan test --log-junit test-results/junit.xml
+        run: php scripts/run-schema.php test --log-junit test-results/junit.xml
       - name: Verify application caches
         run: |
           php artisan config:cache
