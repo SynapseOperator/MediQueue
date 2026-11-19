@@ -33,7 +33,7 @@ class ProductExperienceTest extends TestCase
         $key = 'P5_confirmation_original';
         $url = route('appointments.confirm', ['slot_id' => $slot->id, 'request_key' => $key]);
         $this->get($url)->assertRedirect(route('login'));
-        $this->actingAs($patient)->get($url)->assertOk()->assertSee('确认出诊信息')->assertSee('演示患者甲')
+        $this->actingAs($patient)->get($url)->assertOk()->assertSee('确认出诊信息')->assertSee('陈嘉禾')
             ->assertSee('value="'.$key.'"', false)->assertSee('12.34');
         $this->assertDatabaseCount('appointments', 0);
         $this->assertDatabaseHas('slots', ['id' => $slot->id, 'occupied_count' => 0]);
@@ -93,8 +93,8 @@ class ProductExperienceTest extends TestCase
         $other = app(AppointmentService::class)->create($patients[2]->id, $slots[2]->id, 'roster-other');
         app(AppointmentLifecycleService::class)->pay($patients[2]->id, $other);
         $this->actingAs(User::find($doctors[0]->user_id))->get('/doctor/schedules/'.$slots[0]->schedule_id)->assertOk()
-            ->assertSee('演示患者甲')->assertDontSee('演示患者乙')->assertDontSee('演示患者丙')
-            ->assertDontSee('DEMO-PATIENT-001')->assertDontSee(DB::table('payment_orders')->where('appointment_id', $own)->value('order_no'))
+            ->assertSee('陈嘉禾')->assertDontSee('徐明远')->assertDontSee('宋安宁')
+            ->assertDontSee('010-00000001')->assertDontSee(DB::table('payment_orders')->where('appointment_id', $own)->value('order_no'))
             ->assertDontSee('name="capacity"', false);
         $this->get('/doctor/schedules/'.$slots[2]->schedule_id)->assertNotFound();
         $this->get('/doctor/workbench?date=2026-12-01')->assertOk()->assertDontSee('09:00');

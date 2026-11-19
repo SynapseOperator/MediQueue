@@ -101,7 +101,7 @@ class LifecycleHttpTest extends TestCase
         $this->assertSame('PENDING', $refund->status);
         $this->get('/appointments/'.$id)->assertOk()->assertSeeText('退款待处理');
         $this->flushSession();
-        $this->actingAs($admin)->withSession(['_token' => 'test-token'])->get('/admin/appointments/'.$id)->assertOk()->assertSee('演示患者甲')->assertSee('演示全科')->assertSee('演示医生甲')->assertSeeText('退款待处理');
+        $this->actingAs($admin)->withSession(['_token' => 'test-token'])->get('/admin/appointments/'.$id)->assertOk()->assertSee('陈嘉禾')->assertSee('心血管内科')->assertSee('李建国')->assertSeeText('退款待处理');
         $this->post('/admin/appointments/'.$id.'/refund', ['_token' => 'test-token', 'scenario' => 'failed'])->assertRedirect();
         $this->assertDatabaseHas('refunds', ['id' => $refund->id, 'status' => 'FAILED']);
         $this->get('/admin/appointments/'.$id)->assertOk()->assertSeeText('退款失败')->assertSee('模拟退款被拒绝，可重试原退款。');

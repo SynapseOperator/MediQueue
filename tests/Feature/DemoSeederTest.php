@@ -42,14 +42,14 @@ class DemoSeederTest extends TestCase
         $patients = DB::table('patients')->join('users', 'patients.user_id', '=', 'users.id')->select('patients.*', 'users.role')->orderBy('patients.id')->get();
         foreach ($patients as $index => $patient) {
             $this->assertSame('PATIENT', $patient->role);
-            $this->assertStringStartsWith('演示患者', $patient->full_name);
-            $this->assertSame(sprintf('DEMO-PATIENT-%03d', $index + 1), $patient->phone);
+            $this->assertSame(['陈嘉禾', '徐明远', '宋安宁'][$index], $patient->full_name);
+            $this->assertSame(sprintf('010-0000%04d', $index + 1), $patient->phone);
         }
         $doctors = DB::table('doctors')->join('users', 'doctors.user_id', '=', 'users.id')->join('departments', 'doctors.department_id', '=', 'departments.id')->select('doctors.*', 'users.role', 'departments.name as department_name')->orderBy('doctors.id')->get();
-        foreach ($doctors as $doctor) {
+        foreach ($doctors as $doctorIndex => $doctor) {
             $this->assertSame('DOCTOR', $doctor->role);
-            $this->assertStringStartsWith('演示医生', $doctor->full_name);
-            $this->assertStringStartsWith('演示', $doctor->department_name);
+            $this->assertSame(['李建国', '周晓岚'][$doctorIndex], $doctor->full_name);
+            $this->assertSame(['心血管内科', '儿科'][$doctorIndex], $doctor->department_name);
             $schedule = DB::table('schedules')->where('doctor_id', $doctor->id)->sole();
             $this->assertSame($doctor->department_id, $schedule->department_id);
             $this->assertSame($admin->id, $schedule->created_by);
@@ -62,7 +62,7 @@ class DemoSeederTest extends TestCase
                 $this->assertSame(['2026-11-18 01:30:00.000', '2026-11-18 02:00:00.000'][$index], $slot->ends_at);
                 $this->assertSame([3, 2][$index], $slot->capacity);
                 $this->assertSame(0, $slot->occupied_count);
-                $this->assertSame($doctor->full_name === '演示医生甲' ? '12.34' : '30.00', $slot->fee_amount);
+                $this->assertSame($doctor->full_name === '李建国' ? '12.34' : '30.00', $slot->fee_amount);
             }
         }
     }

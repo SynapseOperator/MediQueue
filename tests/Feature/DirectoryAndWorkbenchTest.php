@@ -25,13 +25,13 @@ class DirectoryAndWorkbenchTest extends TestCase
     public function test_public_pages_display_only_open_resources_without_private_fields(): void
     {
         $doctor = DB::table('doctors')->orderBy('id')->first();
-        $this->get('/departments')->assertOk()->assertSee('演示全科');
-        $this->get('/doctors')->assertOk()->assertSee('演示医生甲')->assertDontSee('demo_doctor_1')->assertDontSee('DEMO-PATIENT');
+        $this->get('/departments')->assertOk()->assertSee('心血管内科');
+        $this->get('/doctors')->assertOk()->assertSee('李建国')->assertDontSee('demo_doctor_1')->assertDontSee('010-0000');
         $this->get('/doctors/'.$doctor->id)->assertOk()->assertSee('09:00')->assertSee('12.34')->assertSee('支付为模拟，不产生真实扣款');
-        $this->get('/doctors?department='.$doctor->department_id)->assertOk()->assertSee('演示医生甲')->assertDontSee('演示医生乙');
+        $this->get('/doctors?department='.$doctor->department_id)->assertOk()->assertSee('李建国')->assertDontSee('周晓岚');
         DB::table('departments')->where('id', $doctor->department_id)->update(['status' => 'DISABLED']);
-        $this->get('/departments')->assertOk()->assertDontSee('演示全科');
-        $this->get('/doctors')->assertOk()->assertDontSee('演示医生甲');
+        $this->get('/departments')->assertOk()->assertDontSee('心血管内科');
+        $this->get('/doctors')->assertOk()->assertDontSee('李建国');
         $this->get('/doctors/'.$doctor->id)->assertNotFound();
     }
 
@@ -40,7 +40,7 @@ class DirectoryAndWorkbenchTest extends TestCase
         $doctors = DB::table('doctors')->orderBy('id')->get();
         DB::table('doctors')->where('id', $doctors[0]->id)->update(['status' => 'DISABLED']);
         DB::table('users')->where('id', $doctors[1]->user_id)->update(['status' => 'DISABLED']);
-        $this->get('/doctors')->assertOk()->assertSee('暂无开放医生')->assertDontSee('演示医生甲')->assertDontSee('演示医生乙');
+        $this->get('/doctors')->assertOk()->assertSee('暂无开放医生')->assertDontSee('李建国')->assertDontSee('周晓岚');
         foreach ($doctors as $doctor) {
             $this->get('/doctors/'.$doctor->id)->assertNotFound();
         }
@@ -79,7 +79,7 @@ class DirectoryAndWorkbenchTest extends TestCase
         $schedules = DB::table('schedules')->orderBy('id')->get();
         DB::table('schedules')->where('id', $schedules[1]->id)->update(['status' => 'SUSPENDED', 'suspend_reason' => '其他医生私有说明']);
         $this->actingAs($doctor)->get('/doctor/workbench?doctor_id='.$schedules[1]->doctor_id)
-            ->assertOk()->assertSee('演示医生甲')->assertDontSee('演示医生乙')->assertDontSee('其他医生私有说明');
+            ->assertOk()->assertSee('李建国')->assertDontSee('周晓岚')->assertDontSee('其他医生私有说明');
         $this->get('/doctor/schedules/'.$schedules[0]->id)->assertOk()->assertSee('12.34');
         $this->get('/doctor/schedules/'.$schedules[1]->id)->assertNotFound();
         $this->putJson('/admin/schedules/'.$schedules[0]->id, ['status' => 'CLOSED'])->assertForbidden();
@@ -94,7 +94,7 @@ class DirectoryAndWorkbenchTest extends TestCase
         $this->get('/doctor/workbench')->assertRedirect(route('login'));
         $this->get('/admin/resources')->assertRedirect(route('login'));
         $this->actingAs(User::where('username', 'demo_patient_1')->firstOrFail());
-        $this->get('/patient/profile')->assertOk()->assertSee('演示患者甲')->assertDontSee('演示患者乙');
+        $this->get('/patient/profile')->assertOk()->assertSee('陈嘉禾')->assertDontSee('徐明远');
         $this->get('/doctor/workbench')->assertForbidden();
         $this->get('/admin/resources')->assertForbidden();
         $this->app['session']->flush();
@@ -132,7 +132,7 @@ class DirectoryAndWorkbenchTest extends TestCase
         ])->assertSessionHasErrors('code');
         $html = $this->get('/admin/resources')->assertOk()->getContent();
         $this->assertSame(1, substr_count($html, 'value="仅回填此表单"'));
-        $this->assertStringContainsString('value="演示全科"', $html);
-        $this->assertStringContainsString('value="演示专科"', $html);
+        $this->assertStringContainsString('value="心血管内科"', $html);
+        $this->assertStringContainsString('value="儿科"', $html);
     }
 }
