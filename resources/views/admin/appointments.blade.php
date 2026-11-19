@@ -29,22 +29,22 @@
     </form>
     <p class="hint mt-5">共 {{ $appointments->total() }} 条预约</p>
     <div class="table-wrap mt-2" tabindex="0" role="region" aria-label="预约处理列表">
-        <table>
+        <table class="appointment-table">
             <thead><tr><th>预约编号</th><th>就诊人</th><th>科室及医生</th><th>就诊时间（北京时间）</th><th>挂号费</th><th>当前状态</th><th class="text-right">操作</th></tr></thead>
             <tbody>
                 @forelse($appointments as $appointment)
-                    <tr>
-                        <td>{{ $appointment->appointment_no }}</td>
-                        <td>{{ $appointment->patient_name }}</td>
-                        <td>{{ $appointment->department_name }}<br>{{ $appointment->doctor_name }}</td>
-                        <td>{{ \Carbon\CarbonImmutable::parse($appointment->starts_at, 'UTC')->setTimezone(config('mediqueue.hospital_timezone'))->format('Y-m-d H:i') }}</td>
-                        <td>¥{{ $appointment->fee_amount }}</td>
-                        <td><div class="flex flex-wrap gap-1">
+                    <tr class="appointment-row">
+                        <td data-label="预约编号">{{ $appointment->appointment_no }}</td>
+                        <td data-label="就诊人">{{ $appointment->patient_name }}</td>
+                        <td data-label="科室及医生"><span>{{ $appointment->department_name }} · {{ $appointment->doctor_name }}</span></td>
+                        <td data-label="就诊时间">{{ \Carbon\CarbonImmutable::parse($appointment->starts_at, 'UTC')->setTimezone(config('mediqueue.hospital_timezone'))->format('Y-m-d H:i') }}</td>
+                        <td data-label="挂号费">¥{{ $appointment->fee_amount }}</td>
+                        <td data-label="当前状态"><div class="flex flex-wrap gap-1">
                             <x-resource-status :value="$appointment->status" />
                             <x-resource-status :value="$appointment->order_status" />
                             @if($appointment->refund_status)<x-resource-status :value="$appointment->refund_status" />@endif
                         </div></td>
-                        <td class="text-right"><a class="text-link" href="{{ route('admin.appointments.show', $appointment->id) }}">查看并处理</a></td>
+                        <td class="text-right" data-label="操作"><a class="text-link" href="{{ route('admin.appointments.show', $appointment->id) }}">查看并处理</a></td>
                     </tr>
                 @empty
                     <tr><td colspan="7">暂无符合条件的预约。</td></tr>

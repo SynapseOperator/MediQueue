@@ -13,7 +13,7 @@
                 <div><dt>医生</dt><dd>{{ $appointment->doctor_name }}</dd></div>
                 <div><dt>就诊时间（北京时间）</dt><dd>{{ \Carbon\CarbonImmutable::parse($appointment->starts_at, 'UTC')->setTimezone(config('mediqueue.hospital_timezone'))->format('Y-m-d H:i') }}–{{ \Carbon\CarbonImmutable::parse($appointment->ends_at, 'UTC')->setTimezone(config('mediqueue.hospital_timezone'))->format('H:i') }}</dd></div>
             </dl>
-            @if(in_array($appointment->status, ['PENDING_PAYMENT', 'CONFIRMED'], true) && $appointment->starts_at > now('UTC')->format('Y-m-d H:i:s.v'))
+            @if(($appointment->status === 'CONFIRMED' || ($appointment->status === 'PENDING_PAYMENT' && ! $expired)) && $appointment->starts_at > now('UTC')->format('Y-m-d H:i:s.v'))
                 <form class="mt-4" id="cancel" method="POST" action="{{ route('appointments.cancel', $appointment->id) }}" data-submit-once>
                     @csrf
                     <button class="btn-secondary" data-label="取消预约" type="submit">取消预约</button>

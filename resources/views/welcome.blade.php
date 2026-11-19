@@ -2,7 +2,7 @@
 @section('title', '预约挂号')
 @section('content')
     <section class="panel" aria-labelledby="home-title">
-        <h1 id="home-title" class="page-title">MediQueue 医院预约挂号</h1>
+        <h1 id="home-title" class="page-title">医院预约挂号</h1>
         <form id="directory-search" class="mt-4 flex max-w-2xl items-end gap-2" method="get" role="search" action="{{ route('doctors.index') }}">
             <label for="directory-keyword" class="field min-w-0 flex-1">查找科室或医生
                 <input id="directory-keyword" type="search" placeholder="输入科室或医生姓名" autocomplete="off">

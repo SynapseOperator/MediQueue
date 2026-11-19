@@ -37,7 +37,7 @@
                         @if($appointment->status === 'PENDING_PAYMENT' && $appointment->order_status === 'UNPAID' && $appointment->expires_at > $nowUtc && $appointment->resources_open && config('mediqueue.mock_payments_enabled') && app()->environment(['local', 'demo', 'testing']))
                             <a class="text-link" href="{{ route('appointments.checkout', $appointment->id) }}">去支付</a>
                         @endif
-                        @if(in_array($appointment->status, ['PENDING_PAYMENT', 'CONFIRMED'], true) && $appointment->starts_at > $nowUtc)
+                        @if(($appointment->status === 'CONFIRMED' || ($appointment->status === 'PENDING_PAYMENT' && $appointment->expires_at > $nowUtc)) && $appointment->starts_at > $nowUtc)
                             <a class="text-link" href="{{ route('appointments.show', $appointment->id) }}#cancel">取消预约</a>
                         @endif
                         @if($appointment->refund_status)
