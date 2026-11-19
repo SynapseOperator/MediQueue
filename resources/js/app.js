@@ -1,3 +1,4 @@
+import './directory-search';
 function restore(form) {
     form.dataset.submitting = 'false';
     const button = form.querySelector('[data-submit-disabled]');

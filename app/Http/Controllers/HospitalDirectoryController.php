@@ -16,8 +16,8 @@ class HospitalDirectoryController extends Controller
     public function home(): View
     {
         return view('welcome', [
-            'departments' => Department::query()->where('status', 'ACTIVE')->orderBy('id')->limit(6)->get(),
-            'doctorCount' => $this->publicDoctors()->count(),
+            'departments' => Department::query()->where('status', 'ACTIVE')->orderBy('name')->get(['id', 'name']),
+            'directoryDoctors' => $this->publicDoctors()->orderBy('doctors.full_name')->get(),
         ]);
     }
 
