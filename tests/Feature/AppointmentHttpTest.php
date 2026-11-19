@@ -68,7 +68,7 @@ class AppointmentHttpTest extends TestCase
         $this->actingAs($patients[0])->withSession(['_token' => 'test-token'])->post('/appointments', $payload)->assertRedirect(route('appointments.show', $id));
         $this->assertDatabaseCount('appointments', 1);
         $this->get('/appointments')->assertOk()->assertSee(DB::table('appointments')->value('appointment_no'));
-        $this->get('/appointments/'.$id)->assertOk()->assertSee('UNPAID')->assertSee('待支付')->assertSee('服务端计算的截止剩余时间')->assertSee('模拟微信支付')->assertSee('无实际扣款')->assertDontSee('立即付款');
+        $this->get('/appointments/'.$id)->assertOk()->assertSeeText('未支付')->assertSeeText('待支付')->assertSee('服务端计算的截止剩余时间')->assertSee('模拟微信支付')->assertSee('无实际扣款')->assertDontSee('立即付款');
         $this->flushSession();
         $this->actingAs($patients[1])->get('/appointments/'.$id)->assertNotFound();
         $this->get('/appointments')->assertOk()->assertDontSee(DB::table('appointments')->value('appointment_no'));

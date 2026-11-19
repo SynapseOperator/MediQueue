@@ -92,7 +92,7 @@ class LifecycleHttpTest extends TestCase
         $this->actingAs($patient)->withSession(['_token' => 'test-token'])->post($url, ['_token' => 'test-token', 'scenario' => 'unknown'])
             ->assertRedirect(route('appointments.show', $id))->assertSessionHas('status', '模拟支付结果未知，请刷新本预约核实后重试原操作（无实际扣款）。');
         $this->actingAs($patient)->withSession(['_token' => 'test-token'])->post($url, ['_token' => 'test-token', 'scenario' => 'success'])->assertRedirect(route('appointments.show', $id));
-        $this->get('/appointments/'.$id)->assertOk()->assertSee('CONFIRMED')->assertSee('PAID');
+        $this->get('/appointments/'.$id)->assertOk()->assertSeeText('已确认')->assertSeeText('模拟已支付');
         $this->post('/appointments/'.$id.'/cancel', ['_token' => 'test-token'])->assertRedirect(route('appointments.show', $id));
         $this->assertDatabaseHas('appointments', ['id' => $id, 'status' => 'CANCELLED']);
         $order = DB::table('payment_orders')->where('appointment_id', $id)->first();
