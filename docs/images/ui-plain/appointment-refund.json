@@ -1,0 +1,151 @@
+{
+  "recorded_on": "2026-11-19",
+  "source_revision": "6d5237f1e42df3462707e757539613c7de9ecc00",
+  "format": "Chrome screenshots with bilingual captions",
+  "duration_ms": 90000,
+  "size_px": [
+    1100,
+    918
+  ],
+  "gif_sha256": "f90d6d23070da2aed1176504ebfb80bc78a92011650781f15eb9d5b124a81b6d",
+  "verification": {
+    "final": {
+      "appointment_id": 2,
+      "slot_id": 1,
+      "appointment_status": "CANCELLED",
+      "order_id": 2,
+      "channel": "MOCK_WECHAT",
+      "currency": "CNY",
+      "payment_status": "REFUNDED",
+      "refund_id": 1,
+      "refund_status": "SUCCEEDED",
+      "fee_amount": "12.34",
+      "order_amount": "12.34",
+      "refund_amount": "12.34"
+    },
+    "audit": [
+      {
+        "action": "APPOINTMENT_CREATED",
+        "target_type": "appointments",
+        "target_id": 2,
+        "prior_status": null,
+        "next_status": "PENDING_PAYMENT"
+      },
+      {
+        "action": "PAYMENT_CONFIRMED",
+        "target_type": "appointments",
+        "target_id": 2,
+        "prior_status": "PENDING_PAYMENT",
+        "next_status": "CONFIRMED"
+      },
+      {
+        "action": "APPOINTMENT_CANCELLED",
+        "target_type": "appointments",
+        "target_id": 2,
+        "prior_status": "CONFIRMED",
+        "next_status": "CANCELLED"
+      },
+      {
+        "action": "REFUND_FAILED",
+        "target_type": "refunds",
+        "target_id": 1,
+        "prior_status": "PENDING",
+        "next_status": "FAILED"
+      },
+      {
+        "action": "REFUND_SUCCEEDED",
+        "target_type": "refunds",
+        "target_id": 1,
+        "prior_status": "FAILED",
+        "next_status": "SUCCEEDED"
+      }
+    ],
+    "occupancy_mismatches": 0
+  },
+  "frames": [
+    {
+      "step": 1,
+      "caption_zh": "选择医生可预约时段",
+      "caption_en": "Choose an available doctor time slot",
+      "duration_ms": 7500,
+      "browser_image_sha256": "d8d8b135fc0c838bb61ae985864a1e42260a3beed1c72e4bf1023ac4fa701319"
+    },
+    {
+      "step": 2,
+      "caption_zh": "核对预约信息并确认",
+      "caption_en": "Review and confirm the appointment",
+      "duration_ms": 7500,
+      "browser_image_sha256": "11bc49d398fc2a7596d02103e748749767b7a5a33de28c8cdd5ba3781b341ba9"
+    },
+    {
+      "step": 3,
+      "caption_zh": "预约已提交，等待支付",
+      "caption_en": "Appointment submitted; payment pending",
+      "duration_ms": 7500,
+      "browser_image_sha256": "d28361fed36c1b15d4ab23ea713256a0da3d03a9cab56116956aa1911f062d1b"
+    },
+    {
+      "step": 4,
+      "caption_zh": "选择模拟支付成功",
+      "caption_en": "Choose simulated successful payment",
+      "duration_ms": 7500,
+      "browser_image_sha256": "7d905915c23ccaa231f9be0e39a75e45c9295e08c6c628353ba58eea8f3abb1c"
+    },
+    {
+      "step": 5,
+      "caption_zh": "支付成功，可取消预约",
+      "caption_en": "Payment succeeded; cancellation is available",
+      "duration_ms": 7500,
+      "browser_image_sha256": "3d8f26d6e3a6af5f543c8ce42270c003526943cfbb86f7924d75b6b3dd338ec3"
+    },
+    {
+      "step": 6,
+      "caption_zh": "预约已取消，退款待处理",
+      "caption_en": "Appointment canceled; refund pending",
+      "duration_ms": 7500,
+      "browser_image_sha256": "741c21c12c8f4612c999ef1df4ddccb797ac701d5ae4ce0a80354d3bd0431064"
+    },
+    {
+      "step": 7,
+      "caption_zh": "管理员提交模拟退款失败",
+      "caption_en": "Administrator submits a simulated failed refund",
+      "duration_ms": 7500,
+      "browser_image_sha256": "d3df16fa0a6f7f5197f1338d80de491439ad5216bc782f1e056619daacd73ade"
+    },
+    {
+      "step": 8,
+      "caption_zh": "退款失败，显示反馈",
+      "caption_en": "Refund failed; feedback is displayed",
+      "duration_ms": 7500,
+      "browser_image_sha256": "dd286aca72a671b338a757ddd9be16a4e57046883c1c2411b4f03dd4a1cb525b"
+    },
+    {
+      "step": 9,
+      "caption_zh": "选择成功并重试原退款",
+      "caption_en": "Choose success and retry the refund",
+      "duration_ms": 7500,
+      "browser_image_sha256": "6b991a07845ed1d70ef82fca0e16225c67d129cfbb54fe92d80b7eb24cead98a"
+    },
+    {
+      "step": 10,
+      "caption_zh": "管理员确认退款成功",
+      "caption_en": "Administrator confirms the successful refund",
+      "duration_ms": 7500,
+      "browser_image_sha256": "0d250b21d908d7fbc04d95cf1563f853c4435408f5a64460c4d7262d089de2a7"
+    },
+    {
+      "step": 11,
+      "caption_zh": "患者在我的预约中查看取消和退款",
+      "caption_en": "Patient reviews cancellation and refund in My Appointments",
+      "duration_ms": 7500,
+      "browser_image_sha256": "40da9d9522d9b21534f12720fcc713781184efc5114b46135305d4290001ce40"
+    },
+    {
+      "step": 12,
+      "caption_zh": "最终状态：预约已取消，退款成功",
+      "caption_en": "Final state: appointment canceled and refund successful",
+      "duration_ms": 7500,
+      "browser_image_sha256": "19ddefea3ba64303d3aeceb5307908d8de90e9ccfcfed1dcac5984686213e8de"
+    }
+  ]
+}

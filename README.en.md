@@ -10,7 +10,7 @@ English · [简体中文](README.md)
 [![Laravel](https://img.shields.io/badge/Laravel-13-FF2D20.svg)](composer.json)
 [![Tests](https://img.shields.io/badge/MySQL_tests-237_passed-2E7D32.svg)](docs/development/release-validation.md)
 
-![MediQueue: find a doctor, choose a time slot, and follow an appointment](docs/images/home.jpg)
+![Appointment home page with department and doctor search, a department directory, and patient instructions](docs/images/ui-plain/home-1440.jpg)
 
 - **One seat, twenty contenders.** Independent PHP processes and MySQL connections compete for the final seat; the test requires exactly one appointment, one order, and one capacity increment.
 - **Protect the patient as well as the slot.** A patient mutex prevents overlapping appointments with different doctors. A shared lock order coordinates booking, suspension, payment, cancellation, and expiry.
@@ -18,7 +18,16 @@ English · [简体中文](README.md)
 - **Database work you can inspect.** Ten core tables, constraints, two views, a procedure, a function, measured query plans, and an isolated backup/restore experiment.
 - **An end-to-end application.** Patient booking and simulated payment, a read-only doctor workspace, and administration for resources, refunds, analytics, and audit history, with responsive pages.
 
-This is an educational project using synthetic data. **All payments and refunds are simulated; no money moves.** It is not a clinical system or a real WeChat Pay integration. The test badge links to recorded regression results; use CI for the current commit's results. The application UI currently uses Simplified Chinese. Watch the [90-second captured workflow GIF](docs/demo.md), presented as actual interaction highlights rather than a continuous screen recording.
+This is an educational project using synthetic data. **All payments and refunds are simulated; no money moves.** It is not a clinical system or a real WeChat Pay integration. The test badge links to recorded regression results; use CI for the current commit's results. The application UI currently uses Simplified Chinese.
+
+<details>
+<summary>Watch the 90-second demo · Booking, cancellation, and refund retry</summary>
+
+![A patient selects a slot, books, makes a simulated payment, and cancels. An administrator retries the same refund after it fails, and the retry succeeds.](docs/images/ui-plain/appointment-refund.gif)
+
+</details>
+
+[Open the GIF directly](docs/images/ui-plain/appointment-refund.gif) · [Capture record](docs/images/ui-plain/appointment-refund.json) · [v1.0.0 walkthrough](https://github.com/SynapseOperator/MediQueue/blob/v1.0.0/docs/demo.md)
 
 ## Quick start
 
