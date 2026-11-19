@@ -55,7 +55,16 @@ class AnalyticsController extends Controller
         $logs = $query->select('id', 'created_at', 'actor_type', 'operator_id', 'action', 'target_type', 'target_id')
             ->orderByDesc('id')->paginate(20)->appends($filters);
 
-        return view('admin.audit', ['filters' => $filters, 'logs' => $logs, 'actions' => self::ACTIONS, 'targets' => self::TARGETS]);
+        // Extract only known status codes for the displayed rows. Raw audit payloads can contain private data.
+        $statuses = "'ACTIVE','DISABLED','DRAFT','OPEN','SUSPENDED','CLOSED','PENDING_PAYMENT','CONFIRMED',
+            'CANCELLED','EXPIRED','COMPLETED','UNPAID','PAID','REFUND_PENDING','REFUNDED','PENDING','FAILED','SUCCEEDED'";
+        $changes = DB::table('audit_logs')->whereIn('id', $logs->getCollection()->pluck('id'))
+            ->select('id')
+            ->selectRaw("CASE WHEN BINARY before_state->>'$.status' IN ($statuses) THEN before_state->>'$.status' END AS before_status")
+            ->selectRaw("CASE WHEN BINARY after_state->>'$.status' IN ($statuses) THEN after_state->>'$.status' END AS after_status")
+            ->get()->keyBy('id');
+
+        return view('admin.audit', ['filters' => $filters, 'logs' => $logs, 'changes' => $changes, 'actions' => self::ACTIONS, 'targets' => self::TARGETS]);
     }
 
     private function filters(Request $request, array $extra = []): array
