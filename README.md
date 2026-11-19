@@ -10,7 +10,7 @@
 [![Laravel](https://img.shields.io/badge/Laravel-13-FF2D20.svg)](composer.json)
 [![Tests](https://img.shields.io/badge/MySQL_tests-237_passed-2E7D32.svg)](docs/development/release-validation.md)
 
-![MediQueue 首页：查找医生、选择时段、跟踪预约](docs/images/home.jpg)
+![预约挂号首页，提供科室和医生搜索、科室导航与就诊须知](docs/images/ui-plain/home-1440.jpg)
 
 - **竞争的是最后一个名额。** 20 个独立 PHP 进程、20 位患者同步竞争，验证恰好一条预约、一条订单和一次占号。
 - **保护患者，也保护号源。** 患者级串行化阻止跨医生时间冲突，统一锁顺序协调预约、停诊、付款、取消与回收。
@@ -18,7 +18,16 @@
 - **数据库成果可以核对。** 十张核心表、CHECK/外键/唯一约束、两视图、一过程、一函数，以及真实 EXPLAIN 和隔离恢复记录。
 - **可以完整体验。** 患者挂号与模拟支付、医生只读工作台、管理员资源管理、退款、统计和审计，支持手机布局。
 
-这是使用合成资料的课程与工程学习项目。**模拟微信支付／无实际扣款**，不接入真实商户，也不用于真实诊疗。测试徽章对应链接中的实际回归结果；当前提交的执行结果以 CI 为准。可先看 [90 秒真实流程 GIF](docs/demo.md)（操作步骤节选）。
+这是使用合成资料的课程与工程学习项目。**模拟微信支付／无实际扣款**，不接入真实商户，也不用于真实诊疗。测试徽章对应链接中的实际回归结果；当前提交的执行结果以 CI 为准。
+
+<details>
+<summary>观看 90 秒演示 · 从预约挂号到退款重试</summary>
+
+![患者选时段、预约、模拟付款并取消；管理员处理同一笔退款，首次失败后重试成功](docs/images/ui-plain/appointment-refund.gif)
+
+</details>
+
+[直接打开 GIF](docs/images/ui-plain/appointment-refund.gif) · [操作记录与 v1.0.0 历史演示](docs/demo.md)
 
 ## 快速开始
 
