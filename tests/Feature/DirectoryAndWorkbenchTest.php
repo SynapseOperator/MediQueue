@@ -27,7 +27,7 @@ class DirectoryAndWorkbenchTest extends TestCase
         $doctor = DB::table('doctors')->orderBy('id')->first();
         $this->get('/departments')->assertOk()->assertSee('演示全科');
         $this->get('/doctors')->assertOk()->assertSee('演示医生甲')->assertDontSee('demo_doctor_1')->assertDontSee('DEMO-PATIENT');
-        $this->get('/doctors/'.$doctor->id)->assertOk()->assertSee('09:00')->assertSee('12.34')->assertSee('模拟微信支付（无实际扣款）');
+        $this->get('/doctors/'.$doctor->id)->assertOk()->assertSee('09:00')->assertSee('12.34')->assertSee('支付为模拟，不产生真实扣款');
         $this->get('/doctors?department='.$doctor->department_id)->assertOk()->assertSee('演示医生甲')->assertDontSee('演示医生乙');
         DB::table('departments')->where('id', $doctor->department_id)->update(['status' => 'DISABLED']);
         $this->get('/departments')->assertOk()->assertDontSee('演示全科');
