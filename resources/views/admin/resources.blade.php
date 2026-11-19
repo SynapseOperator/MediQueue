@@ -6,37 +6,152 @@
         $doctorNames = $doctors->pluck('full_name', 'id');
         $tomorrow = \Carbon\CarbonImmutable::now(config('mediqueue.hospital_timezone'))->addDay()->startOfDay();
     @endphp
-    <p class="eyebrow">管理员</p><h1 class="page-title mt-2">医院资源管理</h1>
-    <p class="mt-3 max-w-3xl leading-7 text-slate-600">先建立科室和医生，再创建草稿排班、配置时段并发布。停用、关闭或停诊会保留历史关联；停诊不会自动取消既有预约。</p>
-    <nav class="surface-muted mt-6 flex flex-wrap gap-3" aria-label="资源分类">
-        <a class="btn-secondary" href="#departments">科室 {{ $departments->count() }}</a><a class="btn-secondary" href="#doctors">医生 {{ $doctors->count() }}</a><a class="btn-secondary" href="#schedules">排班 {{ $schedules->count() }}</a><a class="btn-secondary" href="#slots">时段 {{ $slots->count() }}</a>
+    <h1 class="page-title">医院资源管理</h1>
+    <p class="page-intro">创建科室和医生后，可新增排班、配置时段并开放预约。停诊后请到<a class="text-link" href="{{ route('admin.appointments.index') }}">预约处理</a>逐项核实已有预约。</p>
+    <nav class="mt-4 flex flex-wrap gap-2" aria-label="资源分类">
+        <a class="btn-secondary" href="#departments">科室 {{ $departments->count() }}</a>
+        <a class="btn-secondary" href="#doctors">医生 {{ $doctors->count() }}</a>
+        <a class="btn-secondary" href="#schedules">排班 {{ $schedules->count() }}</a>
+        <a class="btn-secondary" href="#slots">号源时段 {{ $slots->count() }}</a>
     </nav>
-    <section id="departments" class="mt-10 scroll-mt-5">
-        <h2 class="section-title mb-5">科室</h2>
-        <details class="panel" @if(old('_form') === 'department-new') open @endif><summary>＋ 创建科室</summary>@include('admin.forms.department', ['record' => null])</details>
-        <div class="mt-4 grid gap-4 md:grid-cols-2">
-            @foreach($departments as $record)<details class="panel" @if(old('_form') === 'department-'.$record->id) open @endif><summary>{{ $record->name }} <x-resource-status :value="$record->status" /></summary>@include('admin.forms.department')</details>@endforeach
+    <section id="departments" class="mt-6">
+        <h2 class="section-title">科室</h2>
+        <details class="panel mt-3" @if(old('_form') === 'department-new') open @endif>
+            <summary>创建科室</summary>
+            @include('admin.forms.department', ['record' => null])
+        </details>
+        <div class="table-wrap mt-3" role="region" tabindex="0" aria-label="科室列表">
+            <table>
+                <thead><tr><th>科室名称</th><th>编码</th><th>状态</th><th class="text-right">操作</th></tr></thead>
+                <tbody>
+                    @forelse($departments as $record)
+                        <tr>
+                            <td>{{ $record->name }}</td>
+                            <td>{{ $record->code }}</td>
+                            <td><x-resource-status :value="$record->status" /></td>
+                            <td class="text-right"><a class="text-link" href="#edit-department-{{ $record->id }}" aria-label="编辑科室 {{ $record->id }}">编辑</a></td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="4">暂无科室。</td></tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
+        @foreach($departments as $record)
+            <section id="edit-department-{{ $record->id }}" tabindex="-1"
+                     @class(['panel mt-3 target:block', 'hidden' => old('_form') !== 'department-'.$record->id])>
+                <div class="flex items-center justify-between gap-4">
+                    <h3 class="font-bold">编辑科室 #{{ $record->id }}</h3>
+                    <a class="text-link" href="#departments">返回列表</a>
+                </div>
+                @include('admin.forms.department')
+            </section>
+        @endforeach
     </section>
-    <section id="doctors" class="mt-10 scroll-mt-5">
-        <h2 class="section-title mb-5">医生</h2>
-        <details class="panel" @if(old('_form') === 'doctor-new') open @endif><summary>＋ 创建医生及登录账号</summary>@include('admin.forms.doctor', ['record' => null])</details>
-        <div class="mt-4 grid gap-4 md:grid-cols-2">
-            @foreach($doctors as $record)<details class="panel" @if(old('_form') === 'doctor-'.$record->id) open @endif><summary>{{ $record->full_name }} · {{ $departmentNames[$record->department_id] }} <x-resource-status :value="$record->status" /></summary>@include('admin.forms.doctor')</details>@endforeach
+    <section id="doctors" class="mt-6">
+        <h2 class="section-title">医生</h2>
+        <details class="panel mt-3" @if(old('_form') === 'doctor-new') open @endif>
+            <summary>创建医生及登录账号</summary>
+            @include('admin.forms.doctor', ['record' => null])
+        </details>
+        <div class="table-wrap mt-3" role="region" tabindex="0" aria-label="医生列表">
+            <table>
+                <thead><tr><th>姓名</th><th>职称</th><th>所属科室</th><th>状态</th><th class="text-right">操作</th></tr></thead>
+                <tbody>
+                    @forelse($doctors as $record)
+                        <tr>
+                            <td>{{ $record->full_name }}</td>
+                            <td>{{ $record->title }}</td>
+                            <td>{{ $departmentNames[$record->department_id] }}</td>
+                            <td><x-resource-status :value="$record->status" /></td>
+                            <td class="text-right"><a class="text-link" href="#edit-doctor-{{ $record->id }}" aria-label="编辑医生 {{ $record->id }}">编辑</a></td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="5">暂无医生。</td></tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
+        @foreach($doctors as $record)
+            <section id="edit-doctor-{{ $record->id }}" tabindex="-1"
+                     @class(['panel mt-3 target:block', 'hidden' => old('_form') !== 'doctor-'.$record->id])>
+                <div class="flex items-center justify-between gap-4">
+                    <h3 class="font-bold">编辑医生 #{{ $record->id }}</h3>
+                    <a class="text-link" href="#doctors">返回列表</a>
+                </div>
+                @include('admin.forms.doctor')
+            </section>
+        @endforeach
     </section>
-    <section id="schedules" class="mt-10 scroll-mt-5">
-        <h2 class="section-title mb-5">出诊排班</h2>
-        <details class="panel" @if(old('_form') === 'schedule-new') open @endif><summary>＋ 创建排班</summary>@include('admin.forms.schedule', ['record' => null])</details>
-        <div class="mt-4 space-y-4">
-            @foreach($schedules as $record)<details class="panel" @if(old('_form') === 'schedule-'.$record->id) open @endif><summary>#{{ $record->id }} · {{ $record->work_date }} · {{ $doctorNames[$record->doctor_id] }} <x-resource-status :value="$record->status" /></summary>@include('admin.forms.schedule')</details>@endforeach
+    <section id="schedules" class="mt-6">
+        <h2 class="section-title">排班</h2>
+        <details class="panel mt-3" @if(old('_form') === 'schedule-new') open @endif>
+            <summary>创建排班</summary>
+            @include('admin.forms.schedule', ['record' => null])
+        </details>
+        <div class="table-wrap mt-3" role="region" tabindex="0" aria-label="排班列表">
+            <table>
+                <thead><tr><th>出诊日期</th><th>医生</th><th>出诊时间</th><th>状态</th><th class="text-right">操作</th></tr></thead>
+                <tbody>
+                    @forelse($schedules as $record)
+                        <tr>
+                            <td>{{ $record->work_date }}</td>
+                            <td>{{ $doctorNames[$record->doctor_id] }}</td>
+                            <td>{{ \Carbon\CarbonImmutable::parse($record->starts_at, 'UTC')->setTimezone(config('mediqueue.hospital_timezone'))->format('H:i') }}–{{ \Carbon\CarbonImmutable::parse($record->ends_at, 'UTC')->setTimezone(config('mediqueue.hospital_timezone'))->format('H:i') }}</td>
+                            <td><x-resource-status :value="$record->status" /></td>
+                            <td class="text-right"><a class="text-link" href="#edit-schedule-{{ $record->id }}" aria-label="编辑排班 {{ $record->id }}">编辑</a></td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="5">暂无排班。</td></tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
+        @foreach($schedules as $record)
+            <section id="edit-schedule-{{ $record->id }}" tabindex="-1"
+                     @class(['panel mt-3 target:block', 'hidden' => old('_form') !== 'schedule-'.$record->id])>
+                <div class="flex items-center justify-between gap-4">
+                    <h3 class="font-bold">编辑排班 #{{ $record->id }}</h3>
+                    <a class="text-link" href="#schedules">返回列表</a>
+                </div>
+                @include('admin.forms.schedule')
+            </section>
+        @endforeach
     </section>
-    <section id="slots" class="mt-10 scroll-mt-5">
-        <h2 class="section-title mb-5">号源时段</h2>
-        <details class="panel" @if(old('_form') === 'slot-new') open @endif><summary>＋ 配置时段</summary>@include('admin.forms.slot', ['record' => null])</details>
-        <div class="mt-4 space-y-4">
-            @foreach($slots as $record)<details class="panel" @if(old('_form') === 'slot-'.$record->id) open @endif><summary>#{{ $record->id }} · 排班 #{{ $record->schedule_id }} · {{ \Carbon\CarbonImmutable::parse($record->starts_at, 'UTC')->setTimezone(config('mediqueue.hospital_timezone'))->format('m-d H:i') }} · 占用 {{ $record->occupied_count }}/{{ $record->capacity }} <x-resource-status :value="$record->status" /></summary>@include('admin.forms.slot')</details>@endforeach
+    <section id="slots" class="mt-6">
+        <h2 class="section-title">号源时段</h2>
+        <details class="panel mt-3" @if(old('_form') === 'slot-new') open @endif>
+            <summary>配置时段</summary>
+            @include('admin.forms.slot', ['record' => null])
+        </details>
+        <div class="table-wrap mt-3" role="region" tabindex="0" aria-label="号源时段列表">
+            <table>
+                <thead><tr><th>排班编号</th><th>就诊时间</th><th>占用 / 容量</th><th>挂号费</th><th>状态</th><th class="text-right">操作</th></tr></thead>
+                <tbody>
+                    @forelse($slots as $record)
+                        <tr>
+                            <td>{{ $record->schedule_id }}</td>
+                            <td>{{ \Carbon\CarbonImmutable::parse($record->starts_at, 'UTC')->setTimezone(config('mediqueue.hospital_timezone'))->format('m-d H:i') }}–{{ \Carbon\CarbonImmutable::parse($record->ends_at, 'UTC')->setTimezone(config('mediqueue.hospital_timezone'))->format('H:i') }}</td>
+                            <td>{{ $record->occupied_count }} / {{ $record->capacity }}</td>
+                            <td>¥{{ $record->fee_amount }}</td>
+                            <td><x-resource-status :value="$record->status" /></td>
+                            <td class="text-right"><a class="text-link" href="#edit-slot-{{ $record->id }}" aria-label="编辑号源时段 {{ $record->id }}">编辑</a></td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="6">暂无号源时段。</td></tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
+        @foreach($slots as $record)
+            <section id="edit-slot-{{ $record->id }}" tabindex="-1"
+                     @class(['panel mt-3 target:block', 'hidden' => old('_form') !== 'slot-'.$record->id])>
+                <div class="flex items-center justify-between gap-4">
+                    <h3 class="font-bold">编辑号源时段 #{{ $record->id }}</h3>
+                    <a class="text-link" href="#slots">返回列表</a>
+                </div>
+                @include('admin.forms.slot')
+            </section>
+        @endforeach
     </section>
 @endsection

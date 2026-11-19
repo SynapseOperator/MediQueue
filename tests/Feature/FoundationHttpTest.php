@@ -16,9 +16,9 @@ class FoundationHttpTest extends TestCase
         $this->get('/')
             ->assertOk()
             ->assertSee('MediQueue')
-            ->assertSee('选择医生与时段')
-            ->assertSee('模拟微信支付')
-            ->assertSee('无实际扣款');
+            ->assertSee('查找科室或医生')
+            ->assertSee('支付为模拟')
+            ->assertSee('不产生真实扣款');
     }
 
     public function test_application_liveness_endpoint_is_available(): void

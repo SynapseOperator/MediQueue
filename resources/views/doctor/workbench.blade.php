@@ -1,13 +1,36 @@
 @extends('layouts.app')
 @section('title', '医生工作台')
 @section('content')
-    <p class="eyebrow">本人出诊 · 只读</p><h1 class="page-title mt-2">{{ $doctor->full_name }}的工作台</h1>
-    <p class="mt-3 text-slate-600">排班由管理员维护。如需调整，请联系管理员。此处不提供排班或号源修改入口。</p>
-    <form method="GET" class="surface-muted mt-6 flex flex-wrap items-end gap-3"><label class="field">出诊日期<input type="date" name="date" value="{{ request('date') }}"></label><button class="btn" type="submit">筛选</button><a class="text-link py-3" href="{{ route('doctor.workbench') }}">全部日期</a></form>
-    @if($doctor->status !== 'ACTIVE')<p class="mt-5 rounded-xl bg-amber-50 p-4 text-amber-900">您的医生资源当前已停用，历史安排仍保留可查。</p>@endif
-    <section class="mt-8"><h2 class="section-title">出诊时间轴</h2><div class="mt-5 space-y-4">
-        @forelse($schedules as $schedule)<article class="panel flex flex-wrap items-start gap-5"><div class="min-w-32 border-l-4 border-teal-500 pl-4"><p class="font-bold">{{ $schedule->work_date }}</p><p class="mt-1 text-sm text-slate-500">{{ \Carbon\CarbonImmutable::parse($schedule->starts_at, 'UTC')->setTimezone(config('mediqueue.hospital_timezone'))->format('H:i') }}–{{ \Carbon\CarbonImmutable::parse($schedule->ends_at, 'UTC')->setTimezone(config('mediqueue.hospital_timezone'))->format('H:i') }}</p></div><div class="flex-1"><p class="font-bold">{{ $schedule->department_name }}</p><div class="mt-2"><x-resource-status :value="$schedule->status" /></div></div><a class="text-link" href="{{ route('doctor.schedules.show', $schedule->id) }}">查看时段 →</a></article>
-        @empty<div class="panel">暂无本人排班。</div>@endforelse
-    </div></section>
-    <div class="mt-6">{{ $schedules->links() }}</div>
+    <h1 class="page-title">{{ $doctor->full_name }}的工作台</h1>
+    <form method="GET" class="mt-5 flex flex-wrap items-end gap-3">
+        <label class="field">出诊日期<input type="date" name="date" value="{{ request('date') }}"></label>
+        <button class="btn" type="submit">筛选</button>
+        <a class="text-link" href="{{ route('doctor.workbench') }}">全部日期</a>
+    </form>
+    @if($doctor->status !== 'ACTIVE')
+        <p class="mt-4 text-amber-900">您已暂停接诊，仍可查看既往出诊安排。</p>
+    @endif
+    @forelse($schedules->getCollection()->groupBy('work_date') as $date => $day)
+        <section class="mt-6">
+            <h2 class="section-title">{{ $date }}</h2>
+            <div class="table-wrap mt-2" tabindex="0" role="region" aria-label="{{ $date }} 出诊安排">
+                <table>
+                    <thead><tr><th>北京时间</th><th>出诊科室</th><th>排班状态</th><th class="text-right">名单</th></tr></thead>
+                    <tbody>
+                        @foreach($day as $schedule)
+                            <tr>
+                                <td>{{ \Carbon\CarbonImmutable::parse($schedule->starts_at, 'UTC')->setTimezone(config('mediqueue.hospital_timezone'))->format('H:i') }}–{{ \Carbon\CarbonImmutable::parse($schedule->ends_at, 'UTC')->setTimezone(config('mediqueue.hospital_timezone'))->format('H:i') }}</td>
+                                <td>{{ $schedule->department_name }}</td>
+                                <td><x-resource-status :value="$schedule->status" /></td>
+                                <td class="text-right"><a class="text-link" href="{{ route('doctor.schedules.show', $schedule->id) }}">时段及名单</a></td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    @empty
+        <p class="empty-state mt-5">暂无本人排班。</p>
+    @endforelse
+    <div class="mt-5">{{ $schedules->links() }}</div>
 @endsection

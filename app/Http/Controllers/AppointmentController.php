@@ -63,11 +63,14 @@ class AppointmentController extends Controller
             ->join('slots', 'slots.id', '=', 'appointments.slot_id')->join('schedules', 'schedules.id', '=', 'slots.schedule_id')
             ->join('doctors', 'doctors.id', '=', 'schedules.doctor_id')->join('departments', 'departments.id', '=', 'schedules.department_id')
             ->join('payment_orders', 'payment_orders.appointment_id', '=', 'appointments.id')->leftJoin('refunds', 'refunds.payment_order_id', '=', 'payment_orders.id')
+            ->join('users as doctor_account', 'doctor_account.id', '=', 'doctors.user_id')
             ->where('patients.user_id', $request->user()->id)
             ->when($input['status'] ?? null, fn ($query, $status) => $query->where('appointments.status', $status))
-            ->select('appointments.id', 'appointments.appointment_no', 'appointments.status', 'appointments.created_at', 'appointments.fee_amount',
+            ->select('appointments.id', 'appointments.appointment_no', 'appointments.status', 'appointments.created_at', 'appointments.expires_at', 'appointments.fee_amount',
                 'doctors.full_name as doctor_name', 'departments.name as department_name', 'slots.starts_at', 'slots.ends_at',
                 'payment_orders.status as order_status', 'refunds.status as refund_status')
+            ->selectRaw("departments.status = 'ACTIVE' AND doctors.status = 'ACTIVE' AND doctor_account.status = 'ACTIVE'
+                AND schedules.status = 'OPEN' AND slots.status = 'OPEN' AS resources_open")
             ->orderByDesc('appointments.id')->paginate(20)->withQueryString();
 
         return view('appointments.index', compact('appointments'));

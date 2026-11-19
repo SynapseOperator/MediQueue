@@ -31,8 +31,8 @@ class DatabaseSeeder extends Seeder
             ]);
 
             foreach ([
-                ['code' => 'DEMO_GENERAL', 'department' => '演示全科', 'name' => '演示医生甲', 'username' => 'demo_doctor_1', 'fee' => '12.34'],
-                ['code' => 'DEMO_SPECIALTY', 'department' => '演示专科', 'name' => '演示医生乙', 'username' => 'demo_doctor_2', 'fee' => '30.00'],
+                ['code' => 'DEMO_GENERAL', 'department' => '心血管内科', 'name' => '李建国', 'title' => '主任医师', 'specialty' => '高血压、冠心病', 'username' => 'demo_doctor_1', 'fee' => '12.34'],
+                ['code' => 'DEMO_SPECIALTY', 'department' => '儿科', 'name' => '周晓岚', 'title' => '副主任医师', 'specialty' => '儿童呼吸系统疾病、儿童保健', 'username' => 'demo_doctor_2', 'fee' => '30.00'],
             ] as $doctor) {
                 $departmentId = DB::table('departments')->insertGetId([
                     'code' => $doctor['code'], 'name' => $doctor['department'], 'status' => 'ACTIVE', ...$timestamps,
@@ -43,7 +43,7 @@ class DatabaseSeeder extends Seeder
                 ]);
                 $doctorId = DB::table('doctors')->insertGetId([
                     'user_id' => $userId, 'department_id' => $departmentId, 'full_name' => $doctor['name'],
-                    'title' => '演示医师', 'status' => 'ACTIVE', ...$timestamps,
+                    'title' => $doctor['title'], 'specialty' => $doctor['specialty'], 'status' => 'ACTIVE', ...$timestamps,
                 ]);
                 $start = CarbonImmutable::now('Asia/Shanghai')->addDay()->startOfDay()->setTime(9, 0);
                 $scheduleId = DB::table('schedules')->insertGetId([
@@ -63,15 +63,15 @@ class DatabaseSeeder extends Seeder
                 }
             }
 
-            foreach (['甲', '乙', '丙'] as $index => $name) {
+            foreach (['陈嘉禾', '徐明远', '宋安宁'] as $index => $name) {
                 $number = $index + 1;
                 $userId = DB::table('users')->insertGetId([
                     'username' => 'demo_patient_'.$number, 'password_hash' => Hash::make(bin2hex(random_bytes(32))),
                     'role' => 'PATIENT', 'status' => 'ACTIVE', ...$timestamps,
                 ]);
                 DB::table('patients')->insert([
-                    'user_id' => $userId, 'full_name' => '演示患者'.$name,
-                    'phone' => sprintf('DEMO-PATIENT-%03d', $number), ...$timestamps,
+                    'user_id' => $userId, 'full_name' => $name,
+                    'phone' => sprintf('010-0000%04d', $number), ...$timestamps,
                 ]);
             }
         });

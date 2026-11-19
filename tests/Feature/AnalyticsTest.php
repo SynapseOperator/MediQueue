@@ -173,6 +173,23 @@ class AnalyticsTest extends TestCase
         $this->get('/admin/audit?from=2026-11-16&to=2026-11-16&action=PAYMENT_CONFIRMED')->assertOk()->assertSee('此条件下暂无审计记录');
     }
 
+    public function test_audit_discloses_only_known_status_codes_in_closed_details(): void
+    {
+        $id = DB::table('audit_logs')->insertGetId([
+            'actor_type' => 'SYSTEM', 'action' => 'PAYMENT_CONFIRMED', 'target_type' => 'appointments', 'target_id' => 123,
+            'before_state' => json_encode(['status' => 'PRIVATE-FREE-TEXT', 'phone' => 'PRIVATE-CONTACT']),
+            'after_state' => json_encode(['status' => 'CONFIRMED', 'password' => 'PRIVATE-SECRET']),
+            'created_at' => '2026-11-16 12:00:00.000',
+        ]);
+        $response = $this->actingAs(User::where('role', 'ADMIN')->sole())
+            ->get('/admin/audit?from=2026-11-16&to=2026-11-16&target_id=123')->assertOk();
+        $response->assertSee('<details><summary', false)->assertSeeText('变更后')->assertSeeText('已确认')
+            ->assertDontSee('PRIVATE-FREE-TEXT')->assertDontSee('PRIVATE-CONTACT')->assertDontSee('PRIVATE-SECRET');
+        $change = $response->viewData('changes')->get($id);
+        $this->assertNull($change->before_status);
+        $this->assertSame('CONFIRMED', $change->after_status);
+    }
+
     public function test_occupancy_mismatch_is_visible_without_repairing_business_rows(): void
     {
         $slot = DB::table('slots')->orderBy('id')->first();

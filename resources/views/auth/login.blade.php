@@ -1,10 +1,10 @@
 @extends('layouts.app')
 @section('title', '登录')
 @section('content')
-    <section class="panel mx-auto max-w-md border-t-4 border-t-teal-700">
-        <p class="eyebrow">欢迎回来</p><h1 class="page-title mt-2">登录 MediQueue</h1>
+    <section class="panel mx-auto max-w-md">
+        <h1 class="page-title">账号登录</h1>
         <p class="mt-3 text-sm text-slate-600">患者、医生和管理员使用各自账号登录。</p>
-        <form method="POST" action="{{ route('login.store') }}" class="mt-7 space-y-5">
+        <form method="POST" action="{{ route('login.store') }}" class="mt-5 space-y-4">
             @csrf
             <label class="field">用户名<input name="username" value="{{ $oldInput['username'] ?? '' }}" required maxlength="64" autocomplete="username" autofocus></label>
             <label class="field">密码<input type="password" name="password" required autocomplete="current-password"></label>

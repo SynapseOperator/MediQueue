@@ -58,9 +58,9 @@ class DemoScenario extends Command
                 $admin = DB::table('users')->insertGetId(['username' => $prefix.'_admin', 'password_hash' => Hash::make($adminPassword), 'role' => 'ADMIN', 'status' => 'ACTIVE', ...$stamp]);
                 $doctorUser = DB::table('users')->insertGetId(['username' => $prefix.'_doctor', 'password_hash' => Hash::make($doctorPassword), 'role' => 'DOCTOR', 'status' => 'ACTIVE', ...$stamp]);
                 $patientUser = DB::table('users')->insertGetId(['username' => $prefix.'_history', 'password_hash' => Hash::make(bin2hex(random_bytes(24))), 'role' => 'PATIENT', 'status' => 'ACTIVE', ...$stamp]);
-                DB::table('patients')->insert(['user_id' => $patientUser, 'full_name' => '演示历史患者', 'phone' => 'DEMO-HISTORY', ...$stamp]);
-                $department = DB::table('departments')->insertGetId(['code' => strtoupper($prefix), 'name' => '演示科室 '.$prefix, 'introduction' => '仅用于演示的虚构科室。', 'status' => 'ACTIVE', ...$stamp]);
-                $doctor = DB::table('doctors')->insertGetId(['user_id' => $doctorUser, 'department_id' => $department, 'full_name' => '演示林医生', 'title' => '演示医师', 'specialty' => '虚构康复咨询', 'introduction' => '仅用于课程演示，不提供真实诊疗。', 'status' => 'ACTIVE', ...$stamp]);
+                DB::table('patients')->insert(['user_id' => $patientUser, 'full_name' => '许文宁', 'phone' => '010-00000009', ...$stamp]);
+                $department = DB::table('departments')->insertGetId(['code' => strtoupper($prefix), 'name' => '康复医学科（'.$prefix.'门诊）', 'introduction' => '提供运动损伤和术后功能康复门诊。', 'status' => 'ACTIVE', ...$stamp]);
+                $doctor = DB::table('doctors')->insertGetId(['user_id' => $doctorUser, 'department_id' => $department, 'full_name' => '林嘉平', 'title' => '主治医师', 'specialty' => '运动损伤、术后康复', 'introduction' => '接诊运动损伤及术后功能恢复期患者。', 'status' => 'ACTIVE', ...$stamp]);
                 $slots = [];
                 $schedules = [];
                 foreach ([$pastStart, $future] as $index => $start) {

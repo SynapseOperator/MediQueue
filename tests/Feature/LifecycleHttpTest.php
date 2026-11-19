@@ -73,7 +73,7 @@ class LifecycleHttpTest extends TestCase
         $id = app(AppointmentService::class)->create($patient->id, DB::table('slots')->value('id'), 'http_payment_key_123');
         $this->actingAs($patient)->get('/admin/appointments')->assertForbidden();
         $this->flushSession();
-        $this->actingAs($admin)->get('/admin/appointments')->assertOk()->assertSee('模拟微信支付');
+        $this->actingAs($admin)->get('/admin/appointments')->assertOk()->assertSee('支付为模拟，不产生真实扣款');
         $this->get('/admin/appointments/'.$id)->assertOk();
         $this->withSession(['_token' => 'test-token'])->post('/admin/appointments/'.$id.'/complete', ['_token' => 'test-token'])->assertSessionHasErrors('verified');
         $this->post('/admin/appointments/'.$id.'/cancel', ['_token' => 'test-token', 'reason_code' => 'PATIENT_REQUEST', 'reason' => '演示', 'verified_unseen' => '1'])->assertSessionHasErrors('reason_code');
@@ -92,23 +92,23 @@ class LifecycleHttpTest extends TestCase
         $this->actingAs($patient)->withSession(['_token' => 'test-token'])->post($url, ['_token' => 'test-token', 'scenario' => 'unknown'])
             ->assertRedirect(route('appointments.show', $id))->assertSessionHas('status', '模拟支付结果未知，请刷新本预约核实后重试原操作（无实际扣款）。');
         $this->actingAs($patient)->withSession(['_token' => 'test-token'])->post($url, ['_token' => 'test-token', 'scenario' => 'success'])->assertRedirect(route('appointments.show', $id));
-        $this->get('/appointments/'.$id)->assertOk()->assertSee('CONFIRMED')->assertSee('PAID');
+        $this->get('/appointments/'.$id)->assertOk()->assertSeeText('已确认')->assertSeeText('模拟已支付');
         $this->post('/appointments/'.$id.'/cancel', ['_token' => 'test-token'])->assertRedirect(route('appointments.show', $id));
         $this->assertDatabaseHas('appointments', ['id' => $id, 'status' => 'CANCELLED']);
         $order = DB::table('payment_orders')->where('appointment_id', $id)->first();
         $refund = DB::table('refunds')->where('payment_order_id', $order->id)->first();
         $this->assertSame('REFUND_PENDING', $order->status);
         $this->assertSame('PENDING', $refund->status);
-        $this->get('/appointments/'.$id)->assertOk()->assertSee('待处理（仅模拟）');
+        $this->get('/appointments/'.$id)->assertOk()->assertSeeText('退款待处理');
         $this->flushSession();
-        $this->actingAs($admin)->withSession(['_token' => 'test-token'])->get('/admin/appointments/'.$id)->assertOk()->assertSee('演示患者甲')->assertSee('演示全科')->assertSee('演示医生甲')->assertSee('待处理（仅模拟）');
+        $this->actingAs($admin)->withSession(['_token' => 'test-token'])->get('/admin/appointments/'.$id)->assertOk()->assertSee('陈嘉禾')->assertSee('心血管内科')->assertSee('李建国')->assertSeeText('退款待处理');
         $this->post('/admin/appointments/'.$id.'/refund', ['_token' => 'test-token', 'scenario' => 'failed'])->assertRedirect();
         $this->assertDatabaseHas('refunds', ['id' => $refund->id, 'status' => 'FAILED']);
-        $this->get('/admin/appointments/'.$id)->assertOk()->assertSee('失败（仅模拟）')->assertSee('模拟退款被拒绝，可重试原退款。');
+        $this->get('/admin/appointments/'.$id)->assertOk()->assertSeeText('退款失败')->assertSee('模拟退款被拒绝，可重试原退款。');
         $this->post('/admin/appointments/'.$id.'/refund', ['_token' => 'test-token', 'scenario' => 'success'])->assertRedirect();
         $this->assertDatabaseHas('refunds', ['id' => $refund->id, 'status' => 'SUCCEEDED']);
         $this->assertDatabaseHas('payment_orders', ['id' => $order->id, 'status' => 'REFUNDED']);
         $this->assertDatabaseCount('refunds', 1);
-        $this->get('/admin/appointments/'.$id)->assertOk()->assertSee('成功（仅模拟）');
+        $this->get('/admin/appointments/'.$id)->assertOk()->assertSeeText('退款成功');
     }
 }
