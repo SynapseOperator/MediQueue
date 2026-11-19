@@ -6,7 +6,7 @@
         'CONFIRMED' => '已确认', 'CANCELLED' => '已取消', 'EXPIRED' => '已过期',
         'COMPLETED' => '已完成', 'UNPAID' => '未支付', 'PAID' => '模拟已支付',
         'REFUND_PENDING' => '退款处理中', 'REFUNDED' => '模拟已退款',
-        'PENDING' => '待处理', 'FAILED' => '失败', 'SUCCEEDED' => '成功',
+        'PENDING' => '退款待处理', 'FAILED' => '退款失败', 'SUCCEEDED' => '退款成功',
     ];
     $tones = [
         'ACTIVE' => 'success', 'OPEN' => 'success', 'CONFIRMED' => 'success',

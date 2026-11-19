@@ -99,7 +99,7 @@ class LifecycleHttpTest extends TestCase
         $refund = DB::table('refunds')->where('payment_order_id', $order->id)->first();
         $this->assertSame('REFUND_PENDING', $order->status);
         $this->assertSame('PENDING', $refund->status);
-        $this->get('/appointments/'.$id)->assertOk()->assertSee('待处理（仅模拟）');
+        $this->get('/appointments/'.$id)->assertOk()->assertSeeText('退款待处理');
         $this->flushSession();
         $this->actingAs($admin)->withSession(['_token' => 'test-token'])->get('/admin/appointments/'.$id)->assertOk()->assertSee('演示患者甲')->assertSee('演示全科')->assertSee('演示医生甲')->assertSee('待处理（仅模拟）');
         $this->post('/admin/appointments/'.$id.'/refund', ['_token' => 'test-token', 'scenario' => 'failed'])->assertRedirect();

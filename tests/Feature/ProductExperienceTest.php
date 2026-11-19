@@ -65,7 +65,7 @@ class ProductExperienceTest extends TestCase
         $this->actingAs($patients[0])->get('/appointments?status=CANCELLED')->assertOk()
             ->assertSee(DB::table('appointments')->find($own)->appointment_no)->assertDontSee(DB::table('appointments')->find($other)->appointment_no);
         $this->get('/appointments?status=PENDING_PAYMENT')->assertOk()->assertDontSee(DB::table('appointments')->find($own)->appointment_no);
-        $this->get('/appointments/'.$own)->assertOk()->assertSee('失败（仅模拟）')->assertSee('模拟退款被拒绝');
+        $this->get('/appointments/'.$own)->assertOk()->assertSeeText('退款失败')->assertSee('模拟退款被拒绝');
         $this->get('/appointments/'.$other)->assertNotFound();
         $this->get('/appointments?status=INVENTED')->assertRedirect()->assertSessionHasErrors('status');
     }

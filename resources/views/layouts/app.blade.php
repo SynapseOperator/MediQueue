@@ -62,7 +62,18 @@
             @include('layouts.status-message', ['message' => session('status')])
         @endif
         @if($errors->any())
-            <div class="alert-error" role="alert"><p>请检查以下内容</p><ul class="list-inside list-disc">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>
+            <div class="alert-error" role="alert"><p>请检查以下内容</p>
+                <ul class="list-inside list-disc">
+                    @foreach($errors->all() as $error)
+                        <li>{{ match ($error) {
+                            '号源归属已变化，请使用原请求标识重试。' => '号源信息已变化，请核对本次预约的时段后重试。',
+                            '预约繁忙，请使用原请求标识重试。' => '当前预约人数较多，请稍后在本页重试。',
+                            '该请求标识已经用于不同号源，请勿改变重试参数。' => '本次预约选择的号源有变化，请先到「我的预约」查看记录。',
+                            '提交结果尚未确认，请查看我的预约，或使用原请求标识重试；不要新建请求标识。' => '网络不稳定时，请先到「我的预约」查看是否已预约成功，不要重复提交。',
+                            default => $error,
+                        } }}</li>
+                    @endforeach
+                </ul></div>
         @endif
         @yield('content')
     </main>
