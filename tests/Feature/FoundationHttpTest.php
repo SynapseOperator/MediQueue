@@ -17,6 +17,7 @@ class FoundationHttpTest extends TestCase
             ->assertOk()
             ->assertSee('MediQueue')
             ->assertSee('查找科室或医生')
+            ->assertSee('所有人员和数据均为虚构')
             ->assertSee('支付为模拟')
             ->assertSee('不产生真实扣款');
     }

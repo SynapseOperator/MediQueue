@@ -1,4 +1,4 @@
-@props(['value'])
+@props(['value', 'variant' => 'badge'])
 @php
     $labels = [
         'ACTIVE' => '启用', 'DISABLED' => '停用', 'DRAFT' => '草稿', 'OPEN' => '开放',
@@ -16,4 +16,8 @@
         'FAILED' => 'danger', 'SUSPENDED' => 'danger',
     ];
 @endphp
+@if($variant === 'text')
+<span class="status-text status-text--{{ $tones[$value] ?? 'neutral' }}">{{ $labels[$value] ?? '未知状态' }}</span>
+@else
 <span class="status-badge status-badge--{{ $tones[$value] ?? 'neutral' }}">{{ $labels[$value] ?? '未知状态' }}</span>
+@endif

@@ -34,6 +34,7 @@ class ProductExperienceTest extends TestCase
         $url = route('appointments.confirm', ['slot_id' => $slot->id, 'request_key' => $key]);
         $this->get($url)->assertRedirect(route('login'));
         $this->actingAs($patient)->get($url)->assertOk()->assertSee('确认出诊信息')->assertSee('陈嘉禾')
+            ->assertSeeText('最晚到就诊开始时')
             ->assertSee('value="'.$key.'"', false)->assertSee('12.34');
         $this->assertDatabaseCount('appointments', 0);
         $this->assertDatabaseHas('slots', ['id' => $slot->id, 'occupied_count' => 0]);

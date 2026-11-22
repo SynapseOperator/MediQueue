@@ -67,6 +67,48 @@ class DemoSeederTest extends TestCase
         }
     }
 
+    public function test_demo_environment_seed_adds_the_full_synthetic_directory_after_the_baseline(): void
+    {
+        CarbonImmutable::setTestNow(CarbonImmutable::parse('2026-11-16T20:30:00Z'));
+        $environment = $this->app['env'];
+        $this->app['env'] = 'demo';
+        try {
+            $this->seed(DatabaseSeeder::class);
+        } finally {
+            $this->app['env'] = $environment;
+        }
+
+        foreach (['users' => 11, 'patients' => 3, 'departments' => 7, 'doctors' => 7, 'schedules' => 7, 'slots' => 14, 'appointments' => 0] as $table => $count) {
+            $this->assertSame($count, DB::table($table)->count(), $table);
+        }
+        $departments = DB::table('departments')->orderBy('id')->get();
+        $this->assertSame(['CARD', 'PED', 'RESP', 'GI', 'ORTH', 'DERM', 'OPH'], $departments->pluck('code')->all());
+        $this->assertSame(['心血管内科', '儿科'], $departments->take(2)->pluck('name')->all());
+        foreach ($departments as $department) {
+            $this->assertNotEmpty($department->introduction, $department->code);
+            $this->assertSame('ACTIVE', $department->status);
+        }
+
+        $doctors = DB::table('doctors')->join('users', 'doctors.user_id', '=', 'users.id')->select('doctors.*', 'users.username', 'users.role')->orderBy('doctors.id')->get();
+        $this->assertSame(['李建国', '周晓岚'], $doctors->take(2)->pluck('full_name')->all());
+        foreach ($doctors as $index => $doctor) {
+            $this->assertSame('demo_doctor_'.($index + 1), $doctor->username);
+            $this->assertSame('DOCTOR', $doctor->role);
+            $this->assertNotEmpty($doctor->specialty);
+            $this->assertNotEmpty($doctor->introduction);
+            $schedule = DB::table('schedules')->where('doctor_id', $doctor->id)->sole();
+            $this->assertSame($doctor->department_id, $schedule->department_id);
+            $this->assertGreaterThan('2026-11-16 20:30:00.000', $schedule->starts_at);
+            $slots = DB::table('slots')->where('schedule_id', $schedule->id)->get();
+            $this->assertCount(2, $slots);
+            foreach ($slots as $slot) {
+                $this->assertGreaterThan(0, $slot->capacity);
+                $this->assertSame(0, $slot->occupied_count);
+                $this->assertMatchesRegularExpression('/\A[1-9][0-9]*\.[0-9]{2}\z/', $slot->fee_amount);
+            }
+        }
+    }
+
     public function test_repeated_seed_rejects_nonempty_business_tables_without_changing_data(): void
     {
         $this->seed(DatabaseSeeder::class);

@@ -2,7 +2,7 @@
 @section('title', '医生列表')
 @section('content')
     <h1 class="page-title">医生列表</h1>
-    <form method="GET" action="{{ route('doctors.index') }}" class="panel mt-4 flex flex-wrap items-end gap-3">
+    <form method="GET" action="{{ route('doctors.index') }}" class="filter-bar mt-6">
         <label class="field grow sm:max-w-xs" for="doctor-department">科室
             <select name="department" id="doctor-department">
                 <option value="">全部科室</option>
@@ -11,23 +11,27 @@
                 @endforeach
             </select>
         </label>
-        <button class="btn" type="submit">查询</button>
+        <button class="btn-secondary" type="submit">查询</button>
     </form>
-    <p class="mt-6 text-sm">共 {{ $doctors->total() }} 位医生</p>
-    <div class="mt-2 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+    <p class="hint mt-6">共 <span class="num">{{ $doctors->total() }}</span> 位医生</p>
+    <div class="mt-2 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         @forelse($doctors as $doctor)
             <article class="panel flex flex-col">
-                <div class="flex items-center gap-3">
+                <div class="doctor-head">
                     <span class="doctor-avatar" aria-hidden="true">{{ mb_substr($doctor->full_name, 0, 1) }}</span>
                     <div class="min-w-0">
                         <h2 class="section-title">{{ $doctor->full_name }}</h2>
-                        <p class="hint">{{ $doctor->title }} · {{ $doctor->department_name }}</p>
+                        <p class="doctor-meta"><span>{{ $doctor->title }}</span><span>{{ $doctor->department_name }}</span></p>
                     </div>
                 </div>
-                <p class="my-3 text-sm">擅长：{{ $doctor->specialty ?: '暂未填写' }}</p>
-                <div class="mt-auto flex flex-wrap items-center justify-between gap-2 border-t border-gray-200 pt-3">
-                    <span class="text-sm">{{ $doctor->next_date ? '最近可约：'.$doctor->next_date : '近期暂无可约号源' }}</span>
-                    <a class="text-link" href="{{ route('doctors.show', $doctor->id) }}" aria-label="查看{{ $doctor->full_name }}的出诊时段">查看排班</a>
+                <p class="my-3 text-sm"><span class="hint">擅长</span> {{ $doctor->specialty ?: '暂未填写' }}</p>
+                <div class="card-foot">
+                    @if($doctor->next_date)
+                        <span>最近可约 <span class="num">{{ $doctor->next_date }}</span></span>
+                    @else
+                        <span class="hint">近期暂无可约号源</span>
+                    @endif
+                    <a class="btn-secondary btn-sm" href="{{ route('doctors.show', $doctor->id) }}" aria-label="查看{{ $doctor->full_name }}的出诊时段">查看排班</a>
                 </div>
             </article>
         @empty
@@ -36,4 +40,3 @@
     </div>
     <div class="mt-4">{{ $doctors->links() }}</div>
 @endsection
-

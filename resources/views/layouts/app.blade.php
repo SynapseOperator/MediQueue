@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#0f6e84">
+    <meta name="theme-color" content="#1f5fa8">
     <title>@yield('title', '医院预约挂号') · MediQueue</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
@@ -78,6 +78,6 @@
         @yield('content')
     </main>
 </div>
-<footer class="site-footer"><div class="site-width">© {{ date('Y') }} MediQueue · 医院预约挂号课程设计</div></footer>
+<footer class="site-footer"><div class="site-width">© {{ date('Y') }} MediQueue 医院预约挂号</div></footer>
 </body>
 </html>

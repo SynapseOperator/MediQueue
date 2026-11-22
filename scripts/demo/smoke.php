@@ -35,7 +35,9 @@ $check(DB::table('information_schema.tables')->where('table_schema', 'mediqueue'
 $check(DB::table('information_schema.tables')->where('table_schema', 'mediqueue')->where('table_type', 'VIEW')->count() === 2, 'two views');
 $check(DB::table('information_schema.routines')->where('routine_schema', 'mediqueue')->count() === 2, 'procedure and function');
 $check((int) DB::selectOne("SELECT fn_intervals_overlap('2030-01-01 09:00:00', '2030-01-01 10:00:00', '2030-01-01 09:30:00', '2030-01-01 10:30:00') AS overlapping")->overlapping === 1, 'runtime can execute reporting function');
-$check(count(DB::select("CALL sp_department_statistics('2020-01-01', '2099-01-01')")) === 2, 'runtime can execute statistics procedure');
+$departmentIds = DB::table('departments')->orderBy('id')->pluck('id')->all();
+$statistics = DB::select("CALL sp_department_statistics('2020-01-01', '2099-01-01')");
+$check($departmentIds !== [] && array_column($statistics, 'department_id') === $departmentIds, 'runtime statistics include each seeded department exactly once');
 $check(DB::table('v_slot_occupancy_check')->where('difference', '<>', 0)->count() === 0, 'slot occupancy agrees with appointments');
 $grants = json_encode(DB::select('SHOW GRANTS'), JSON_THROW_ON_ERROR);
 $check(! preg_match('/\b(ALL PRIVILEGES|CREATE|ALTER|DROP|GRANT OPTION)\b/', $grants), 'runtime has no DDL or grant privilege');

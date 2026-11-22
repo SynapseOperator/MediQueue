@@ -14,7 +14,7 @@
         <a class="btn-secondary" href="#schedules">排班 {{ $schedules->count() }}</a>
         <a class="btn-secondary" href="#slots">号源时段 {{ $slots->count() }}</a>
     </nav>
-    <section id="departments" class="mt-6">
+    <section id="departments" class="mt-8">
         <h2 class="section-title">科室</h2>
         <details class="panel mt-3" @if(old('_form') === 'department-new') open @endif>
             <summary>创建科室</summary>
@@ -27,7 +27,7 @@
                     @forelse($departments as $record)
                         <tr>
                             <td>{{ $record->name }}</td>
-                            <td>{{ $record->code }}</td>
+                            <td><span class="num">{{ $record->code }}</span></td>
                             <td><x-resource-status :value="$record->status" /></td>
                             <td class="text-right"><a class="text-link" href="#edit-department-{{ $record->id }}" aria-label="编辑科室 {{ $record->id }}">编辑</a></td>
                         </tr>
@@ -41,14 +41,14 @@
             <section id="edit-department-{{ $record->id }}" tabindex="-1"
                      @class(['panel mt-3 target:block', 'hidden' => old('_form') !== 'department-'.$record->id])>
                 <div class="flex items-center justify-between gap-4">
-                    <h3 class="font-bold">编辑科室 #{{ $record->id }}</h3>
+                    <h3 class="sub-title">编辑科室 #{{ $record->id }}</h3>
                     <a class="text-link" href="#departments">返回列表</a>
                 </div>
                 @include('admin.forms.department')
             </section>
         @endforeach
     </section>
-    <section id="doctors" class="mt-6">
+    <section id="doctors" class="mt-8">
         <h2 class="section-title">医生</h2>
         <details class="panel mt-3" @if(old('_form') === 'doctor-new') open @endif>
             <summary>创建医生及登录账号</summary>
@@ -76,14 +76,14 @@
             <section id="edit-doctor-{{ $record->id }}" tabindex="-1"
                      @class(['panel mt-3 target:block', 'hidden' => old('_form') !== 'doctor-'.$record->id])>
                 <div class="flex items-center justify-between gap-4">
-                    <h3 class="font-bold">编辑医生 #{{ $record->id }}</h3>
+                    <h3 class="sub-title">编辑医生 #{{ $record->id }}</h3>
                     <a class="text-link" href="#doctors">返回列表</a>
                 </div>
                 @include('admin.forms.doctor')
             </section>
         @endforeach
     </section>
-    <section id="schedules" class="mt-6">
+    <section id="schedules" class="mt-8">
         <h2 class="section-title">排班</h2>
         <details class="panel mt-3" @if(old('_form') === 'schedule-new') open @endif>
             <summary>创建排班</summary>
@@ -95,7 +95,7 @@
                 <tbody>
                     @forelse($schedules as $record)
                         <tr>
-                            <td>{{ $record->work_date }}</td>
+                            <td><span class="num">{{ $record->work_date }}</span></td>
                             <td>{{ $doctorNames[$record->doctor_id] }}</td>
                             <td>{{ \Carbon\CarbonImmutable::parse($record->starts_at, 'UTC')->setTimezone(config('mediqueue.hospital_timezone'))->format('H:i') }}–{{ \Carbon\CarbonImmutable::parse($record->ends_at, 'UTC')->setTimezone(config('mediqueue.hospital_timezone'))->format('H:i') }}</td>
                             <td><x-resource-status :value="$record->status" /></td>
@@ -111,14 +111,14 @@
             <section id="edit-schedule-{{ $record->id }}" tabindex="-1"
                      @class(['panel mt-3 target:block', 'hidden' => old('_form') !== 'schedule-'.$record->id])>
                 <div class="flex items-center justify-between gap-4">
-                    <h3 class="font-bold">编辑排班 #{{ $record->id }}</h3>
+                    <h3 class="sub-title">编辑排班 #{{ $record->id }}</h3>
                     <a class="text-link" href="#schedules">返回列表</a>
                 </div>
                 @include('admin.forms.schedule')
             </section>
         @endforeach
     </section>
-    <section id="slots" class="mt-6">
+    <section id="slots" class="mt-8">
         <h2 class="section-title">号源时段</h2>
         <details class="panel mt-3" @if(old('_form') === 'slot-new') open @endif>
             <summary>配置时段</summary>
@@ -126,14 +126,14 @@
         </details>
         <div class="table-wrap mt-3" role="region" tabindex="0" aria-label="号源时段列表">
             <table>
-                <thead><tr><th>排班编号</th><th>就诊时间</th><th>占用 / 容量</th><th>挂号费</th><th>状态</th><th class="text-right">操作</th></tr></thead>
+                <thead><tr><th>排班编号</th><th>就诊时间</th><th class="col-num">占用 / 容量</th><th class="col-num">挂号费</th><th>状态</th><th class="text-right">操作</th></tr></thead>
                 <tbody>
                     @forelse($slots as $record)
                         <tr>
-                            <td>{{ $record->schedule_id }}</td>
+                            <td><span class="num">#{{ $record->schedule_id }}</span></td>
                             <td>{{ \Carbon\CarbonImmutable::parse($record->starts_at, 'UTC')->setTimezone(config('mediqueue.hospital_timezone'))->format('m-d H:i') }}–{{ \Carbon\CarbonImmutable::parse($record->ends_at, 'UTC')->setTimezone(config('mediqueue.hospital_timezone'))->format('H:i') }}</td>
-                            <td>{{ $record->occupied_count }} / {{ $record->capacity }}</td>
-                            <td>¥{{ $record->fee_amount }}</td>
+                            <td class="col-num"><span class="num">{{ $record->occupied_count }} / {{ $record->capacity }}</span></td>
+                            <td class="col-num"><span class="num">¥{{ $record->fee_amount }}</span></td>
                             <td><x-resource-status :value="$record->status" /></td>
                             <td class="text-right"><a class="text-link" href="#edit-slot-{{ $record->id }}" aria-label="编辑号源时段 {{ $record->id }}">编辑</a></td>
                         </tr>
@@ -147,7 +147,7 @@
             <section id="edit-slot-{{ $record->id }}" tabindex="-1"
                      @class(['panel mt-3 target:block', 'hidden' => old('_form') !== 'slot-'.$record->id])>
                 <div class="flex items-center justify-between gap-4">
-                    <h3 class="font-bold">编辑号源时段 #{{ $record->id }}</h3>
+                    <h3 class="sub-title">编辑号源时段 #{{ $record->id }}</h3>
                     <a class="text-link" href="#slots">返回列表</a>
                 </div>
                 @include('admin.forms.slot')

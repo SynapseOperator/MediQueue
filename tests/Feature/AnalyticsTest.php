@@ -80,11 +80,11 @@ class AnalyticsTest extends TestCase
         $this->assertSame(['2026-11-16', '2026-11-17'], $trend->pluck('creation_date')->all());
         $this->assertSame([1, 5], $trend->pluck('appointment_count')->all());
         $departments = collect($report['departments'])->keyBy('department_code');
-        $this->assertSame(5, (int) $departments['DEMO_GENERAL']->capacity);
-        $this->assertSame(2, (int) $departments['DEMO_GENERAL']->occupied_count);
-        $this->assertSame(2, (int) $departments['DEMO_GENERAL']->cancelled);
-        $this->assertSame(1, (int) $departments['DEMO_SPECIALTY']->pending_payment);
-        $this->assertSame(1, (int) $departments['DEMO_SPECIALTY']->expired);
+        $this->assertSame(5, (int) $departments['CARD']->capacity);
+        $this->assertSame(2, (int) $departments['CARD']->occupied_count);
+        $this->assertSame(2, (int) $departments['CARD']->cancelled);
+        $this->assertSame(1, (int) $departments['PED']->pending_payment);
+        $this->assertSame(1, (int) $departments['PED']->expired);
 
         // A later doctor affiliation must not rewrite historical schedule department statistics.
         $schedule = DB::table('schedules')->find($slots[0]->schedule_id);
